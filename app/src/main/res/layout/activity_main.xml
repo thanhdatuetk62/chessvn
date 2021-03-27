@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <vn.edu.uetchess.ChessLayout
+        android:id="@+id/fragment_chessboard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/button_place_wq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_chessboard"
+        android:text="WQ"
+        android:onClick="testPlacePiece1" />
+
+    <Button
+        android:id="@+id/button_place_bn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_chessboard"
+        android:layout_toEndOf="@id/button_place_wq"
+        android:layout_marginStart="10dp"
+        android:text="BN"
+        android:onClick="testPlacePiece2" />
+
+    <Button
+        android:id="@+id/button_move"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_chessboard"
+        android:layout_toEndOf="@id/button_place_bn"
+        android:layout_marginStart="10dp"
+        android:text="Move"
+        android:onClick="testMovePiece" />
+
+    <Button
+        android:id="@+id/button_reverse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_chessboard"
+        android:layout_toEndOf="@id/button_move"
+        android:layout_marginStart="10dp"
+        android:text="Reverse"
+        android:onClick="testRotatePerspective" />
+
+</RelativeLayout>

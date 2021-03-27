@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Chess</string>
+    <string name="bB">chess_bb</string>
+    <string name="bK">chess_bk</string>
+    <string name="wK">chess_wk</string>
+    <string name="wQ">chess_wq</string>
+    <string name="bN">chess_bn</string>
+</resources>
