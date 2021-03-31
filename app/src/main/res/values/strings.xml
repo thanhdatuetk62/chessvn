@@ -1,8 +1,18 @@
 <resources>
     <string name="app_name">Chess</string>
     <string name="bB">chess_bb</string>
+    <string name="bR">chess_br</string>
+    <string name="bN">chess_bn</string>
     <string name="bK">chess_bk</string>
+    <string name="bQ">chess_bq</string>
+    <string name="bP">chess_bp</string>
+    <string name="wB">chess_wb</string>
+    <string name="wR">chess_wr</string>
+    <string name="wN">chess_wn</string>
     <string name="wK">chess_wk</string>
     <string name="wQ">chess_wq</string>
-    <string name="bN">chess_bn</string>
+    <string name="wP">chess_wp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

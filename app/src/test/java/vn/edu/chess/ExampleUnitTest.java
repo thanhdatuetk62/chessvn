@@ -1,4 +1,4 @@
-package vn.edu.uetchess;
+package vn.edu.chess;
 
 import org.junit.Test;
 

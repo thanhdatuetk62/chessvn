@@ -1,52 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <vn.edu.uetchess.ChessLayout
-        android:id="@+id/fragment_chessboard"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:background="@color/white"
+        android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/button_place_wq"
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/background_2" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/main_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+                app:menu="@menu/menu"
+                app:navigationIcon="@drawable/ic_list_24px"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:subtitle="Standard"
+                app:title="Offline Chess" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/nav_host_fragment"
+                android:name="androidx.navigation.fragment.NavHostFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/nav_graph" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_chessboard"
-        android:text="WQ"
-        android:onClick="testPlacePiece1" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/menu_drawer"
+        android:fitsSystemWindows="true" />
 
-    <Button
-        android:id="@+id/button_place_bn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_chessboard"
-        android:layout_toEndOf="@id/button_place_wq"
-        android:layout_marginStart="10dp"
-        android:text="BN"
-        android:onClick="testPlacePiece2" />
-
-    <Button
-        android:id="@+id/button_move"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_chessboard"
-        android:layout_toEndOf="@id/button_place_bn"
-        android:layout_marginStart="10dp"
-        android:text="Move"
-        android:onClick="testMovePiece" />
-
-    <Button
-        android:id="@+id/button_reverse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_chessboard"
-        android:layout_toEndOf="@id/button_move"
-        android:layout_marginStart="10dp"
-        android:text="Reverse"
-        android:onClick="testRotatePerspective" />
-
-</RelativeLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

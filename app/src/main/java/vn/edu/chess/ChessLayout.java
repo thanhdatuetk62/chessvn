@@ -1,12 +1,12 @@
-package vn.edu.uetchess;
+package vn.edu.chess;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
-public class ChessLayout extends FrameLayout {
+public class ChessLayout extends LinearLayout {
 
     public ChessLayout(Context context) {
         super(context);

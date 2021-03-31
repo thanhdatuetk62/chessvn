@@ -1,4 +1,4 @@
-package vn.edu.uetchess;
+package vn.edu.chess;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,26 +24,29 @@ import java.util.Map;
 public class ChessBoardFragment extends Fragment {
     private static final int SIZE = 8;
     private static final int PIECE_TAG = 0;
-    private static final int OCCUPY_MARK_TAG = 1;
-    private static final int SELECT_MARK_TAG = 2;
-    private static final int CAPTURE_MARK_TAG = 4;
-    private static final int HISTORY_MARK_TAG = 8;
-    private static final int[] MARK_TAGS = {1, 2, 4, 8};
+    private static final int SELECT_MARK_TAG = 1;
+    private static final int HISTORY_MARK_TAG = 2;
+    private static final int CAPTURE_MARK_TAG = 3;
+    private static final int OCCUPY_MARK_TAG = 4;
+    private static final int PROMOTE_MARK_TAG = 5;
     private static final int WHITE_PERSPECTIVE = 0;
     private static final int BLACK_PERSPECTIVE = 1;
     private static final String[] COL_LABELS = {"a", "b", "c", "d", "e", "f", "g", "h"};
     private static final String[] ROW_LABELS = {"8", "7", "6", "5", "4", "3", "2", "1"};
 
     // Lookup tables (include reverse direction)
-    private int mPerspective;
+    private int mPerspective = WHITE_PERSPECTIVE;
     private String[][] mLabelTable;
     private Map<String, Pair<Integer, Integer>> mIndexTable;
 
-    private ViewGroup[][] mCells = new ViewGroup[SIZE][SIZE];
+    private final ViewGroup[][] mCells = new ViewGroup[SIZE][SIZE];
+    private ArrayList<View> mMarks = new ArrayList<>();
     private ViewGroup mBoard;
+    private ChessBoardViewModel model;
 
     public ChessBoardFragment() {
         // Required empty public constructor
+        
     }
 
     @Override
@@ -56,16 +60,47 @@ public class ChessBoardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mBoard = (ViewGroup) view;
+        // Get the view model
+        model = new ViewModelProvider(requireActivity()).get(ChessBoardViewModel.class);
+        // Get reference and assign click listeners
         for(int r=0; r<SIZE; r++) {
             ViewGroup rowBoard = (ViewGroup) mBoard.getChildAt(r);
             for(int c=0; c<SIZE; c++) {
                 ViewGroup cellBoard = (ViewGroup) rowBoard.getChildAt(c);
+                cellBoard.setClickable(true);
+                cellBoard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View cell) {
+                        String location = getLocation(cell);
+                        model.onSelectLocation(location);
+                    }
+                });
                 // Link to views which are specified in  XML file
                 mCells[r][c] = cellBoard;
             }
         }
-        // Dummy assign
-        annotateLabels(WHITE_PERSPECTIVE);
+        // Default white perspective
+        annotateLabels(mPerspective);
+        // Get game state
+        for(Pair<String, String> pair : model.getGameState()) {
+            placePiece(pair.second, pair.first);
+        }
+        // Create observer
+        model.getEvent().observe(getViewLifecycleOwner(), event -> {
+            // 1. Handling perspective
+            changePerspective(event.getPerspective());
+            // 2. Handling move
+            ArrayList<Pair<String, String>> moves = event.getMove();
+            if (moves != null) {
+                for(Pair<String, String> pair : moves) {
+                    move(pair.first, pair.second);
+                }
+            }
+            // 3. Handling marks
+            setMarks(event.getMarks());
+            // 4. Handling lock
+//            setLock(event.getLock());
+        });
     }
 
     private View getByTag(int x, int y, int tag) {
@@ -89,29 +124,6 @@ public class ChessBoardFragment extends Fragment {
         return result;
     }
 
-    private boolean validate(int x, int y) {
-        // Each cell must not contain greater than 1 view which share the same TAG id
-        // Piece check
-        if (countByTag(x, y, PIECE_TAG) > 1) {
-            String message = String.format(Locale.ENGLISH,
-                    "Cell (%d, %d) had already been occupied!", x, y);
-            return false;
-        }
-        // Mark check
-        int cnt = 0;
-        for(int tag : MARK_TAGS) {
-            cnt += countByTag(x, y, tag);
-        }
-        if (cnt > 1) {
-            String message = String.format(Locale.ENGLISH,
-                    "Cell (%d, %d) had already been marked!", x, y);
-            Log.d("TEST", message);
-            return false;
-        }
-        // Everything is OK!
-        return true;
-    }
-
     private float getX(View view) {
         if (view.getParent() == mBoard)
             return view.getX();
@@ -124,13 +136,21 @@ public class ChessBoardFragment extends Fragment {
         return view.getY() + getY((View) view.getParent());
     }
 
-    private void placePiece(String pieceCode, int x, int y) {
+    private String getLocation(View cell) {
+        ViewGroup row = (ViewGroup) cell.getParent();
+        ViewGroup board = (ViewGroup) row.getParent();
+        int y = row.indexOfChild(cell);
+        int x = board.indexOfChild(row);
+        return mLabelTable[x][y];
+    }
+
+    private View placePiece(String pieceCode, int x, int y) {
         // Check if this cell is valid
         if (countByTag(x, y, PIECE_TAG) > 0) {
             String message = String.format(Locale.ENGLISH,
                     "Cannot placePiece because the cell at (%d, %d) had already been occupied!", x, y);
             Log.d("TEST", message);
-            return;
+            return null;
         }
 
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
@@ -150,6 +170,8 @@ public class ChessBoardFragment extends Fragment {
         // Place image into frame at specified location
         ViewGroup cell = mCells[x][y];
         cell.addView(piece);
+
+        return piece;
     }
 
     private void removePiece(int x, int y) {
@@ -164,8 +186,6 @@ public class ChessBoardFragment extends Fragment {
     }
 
     private void move(int srcX, int srcY, int trgX, int trgY) {
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-
         ViewGroup srcCell = mCells[srcX][srcY];
         ViewGroup trgCell = mCells[trgX][trgY];
         View srcPiece = getByTag(srcX, srcY, PIECE_TAG);
@@ -186,7 +206,7 @@ public class ChessBoardFragment extends Fragment {
         srcPiece.animate()
                 .translationX(vecX)
                 .translationY(vecY)
-                .setDuration(300)
+                .setDuration(256)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -206,32 +226,73 @@ public class ChessBoardFragment extends Fragment {
                 });
     }
 
-    private void addMark(int x, int y, int tag) {
-        if(!validate(x, y))
-            return;
-        ImageView mark = new ImageView(requireActivity());
-        mark.setTag(tag);
-        mCells[x][y].addView(mark, 0);
+    private boolean hasTag(View view, int tag) {
+        if (view.getTag() instanceof Integer) {
+            return (Integer) view.getTag() == tag;
+        }
+        return false;
     }
 
-    private void removeMark(int x, int y, int tag) {
+    private View hasTag(int x, int y, int tag) {
         ViewGroup cell = mCells[x][y];
-        View mark = getByTag(x, y, tag);
-        cell.removeView(mark);
+        for(int i=0; i<cell.getChildCount(); i++) {
+            if (hasTag(cell, tag))
+                return cell;
+        }
+        return null;
+    }
+
+    private View addMark(int x, int y, int type) {
+//        if (!isAdded() || getActivity() == null) {
+//            return null;
+//        }
+        ImageView mark = new ImageView(requireActivity());
+        mark.setTag(type);
+        int resID = -1;
+        switch (type) {
+            case SELECT_MARK_TAG:
+                resID = R.drawable.mark_select;
+                break;
+            case HISTORY_MARK_TAG:
+                resID = R.drawable.mark_history;
+                break;
+            case CAPTURE_MARK_TAG:
+                resID = R.drawable.mark_capture;
+                break;
+            case OCCUPY_MARK_TAG:
+                resID = R.drawable.mark_occupy;
+                break;
+            case PROMOTE_MARK_TAG:
+                resID = R.drawable.mark_promote;
+                break;
+            default:
+                return null;
+        }
+        mark.setImageResource(resID);
+        int id = -1;
+        // Add right behind piece if exist
+        ViewGroup cell = mCells[x][y];
+        cell.addView(mark, 0);
+
+        return mark;
     }
 
     public void placePiece(String pieceCode, String labelLocation) {
+        if (pieceCode == null)
+            return;
         // Convert label to index
         Pair<Integer, Integer> indexLocation = mIndexTable.get(labelLocation);
+        assert indexLocation != null;
         int x = indexLocation.first;
         int y = indexLocation.second;
 
-        placePiece(pieceCode, x, y);
+        View piece = placePiece(pieceCode, x, y);
     }
 
     public void removePiece(String labelLocation) {
         // Convert label to index
         Pair<Integer, Integer> indexLocation = mIndexTable.get(labelLocation);
+        assert indexLocation != null;
         int x = indexLocation.first;
         int y = indexLocation.second;
 
@@ -242,43 +303,44 @@ public class ChessBoardFragment extends Fragment {
 
         // Convert label to index
         Pair<Integer, Integer> srcIndexLocation = mIndexTable.get(srcLabelLocation);
+        assert srcIndexLocation != null;
         int srcX = srcIndexLocation.first;
         int srcY = srcIndexLocation.second;
+
         Pair<Integer, Integer> trgIndexLocation = mIndexTable.get(trgLabelLocation);
+        assert trgIndexLocation != null;
         int trgX = trgIndexLocation.first;
         int trgY = trgIndexLocation.second;
 
         move(srcX, srcY, trgX, trgY);
     }
 
-    public void addMark(String labelLocation, int tag) {
+    public View addMark(String labelLocation, int tag) {
         // Convert label to index
         Pair<Integer, Integer> indexLocation = mIndexTable.get(labelLocation);
+        assert indexLocation != null;
         int x = indexLocation.first;
         int y = indexLocation.second;
 
-        addMark(x, y, tag);
+        return addMark(x, y, tag);
     }
 
-    public void removeMark(String labelLocation, int tag) {
-        // Convert label to index
-        Pair<Integer, Integer> indexLocation = mIndexTable.get(labelLocation);
-        int x = indexLocation.first;
-        int y = indexLocation.second;
-        removeMark(x, y, tag);
-    }
+    public void setMarks(ArrayList<Pair<String, Integer>> marks) {
+        // Clear all previous marks
+        for(View mark : mMarks) {
+            ViewGroup cell = (ViewGroup) mark.getParent();
+            cell.removeView(mark);
+        }
+        mMarks.clear();
+        // Set new marks from argument
+        for(Pair<String, Integer> pair : marks) {
 
-    public void clearMarksByTag(int bit) {
-        for(int r=0; r<SIZE; r++) {
-            for(int c=0; c<SIZE; c++) {
-                for(int tag : MARK_TAGS) {
-                    if ((bit & tag) > 0)
-                        removeMark(r, c, tag);
-                }
-            }
+            View mark = addMark(pair.first, pair.second);
+            if (mark != null)
+                mMarks.add(mark);
         }
     }
-
+    // OK UNIT TEST
     public void annotateLabels(int perspective) {
         // Initial member vars based on SDK version (for optimizing)
         mPerspective = perspective;
@@ -304,8 +366,17 @@ public class ChessBoardFragment extends Fragment {
     }
 
     public void rotatePerspective() {
-        // Update perspective labels
-        mPerspective = mPerspective ^ 1;
+        model.rotatePerspective();
+    }
+
+    // OK UNIT TEST
+    public void changePerspective(int perspective) {
+        if (mPerspective == perspective) {
+            // No change
+            return;
+        }
+        // Change perspective
+        mPerspective = perspective;
         annotateLabels(mPerspective);
 
         // Exchange children views between board's cell
@@ -317,20 +388,31 @@ public class ChessBoardFragment extends Fragment {
                 ArrayList<View> children2 = new ArrayList<>();
                 // Store children of both cells into arrays
                 for(int i=0; i<cell1.getChildCount(); i++) {
-                    View v = cell1.getChildAt(i);
-                    children1.add(v);
-                    cell1.removeView(v);
+                    children1.add(cell1.getChildAt(i));
                 }
                 for(int i=0; i<cell2.getChildCount(); i++) {
-                    View v = cell2.getChildAt(i);
-                    children2.add(v);
-                    cell2.removeView(v);
+                    children2.add(cell2.getChildAt(i));
                 }
+                cell1.removeAllViews();
+                cell2.removeAllViews();
                 // Exchange children between cell1 and cell2
                 for(View v : children1)
                     cell2.addView(v);
                 for(View v : children2)
                     cell1.addView(v);
+            }
+        }
+    }
+
+    public void setLock(boolean lock) {
+        // Used to disable/enable player's taps
+        // UNTESTED
+        for(int r=0; r<SIZE; r++) {
+            for(int c=0; c<SIZE; c++) {
+                ViewGroup cell = mCells[r][c];
+                for(int i=0; i<cell.getChildCount(); i++) {
+                    // Do nothing
+                }
             }
         }
     }
