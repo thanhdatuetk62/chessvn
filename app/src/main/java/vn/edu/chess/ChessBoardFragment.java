@@ -40,13 +40,12 @@ public class ChessBoardFragment extends Fragment {
     private Map<String, Pair<Integer, Integer>> mIndexTable;
 
     private final ViewGroup[][] mCells = new ViewGroup[SIZE][SIZE];
-    private ArrayList<View> mMarks = new ArrayList<>();
+    private final ArrayList<View> mMarks = new ArrayList<>();
     private ViewGroup mBoard;
     private ChessBoardViewModel model;
 
     public ChessBoardFragment() {
         // Required empty public constructor
-        
     }
 
     @Override
