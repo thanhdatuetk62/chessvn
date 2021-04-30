@@ -1,4 +1,4 @@
-package vn.edu.chess;
+package vn.edu.chessUI;
 
 public class OneNightEvent<T> {
     private boolean received = false;

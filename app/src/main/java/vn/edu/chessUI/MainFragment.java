@@ -1,4 +1,4 @@
-package vn.edu.chess;
+package vn.edu.chessUI;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,13 +27,12 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        View lanButton = view.findViewById(R.id.button_gameplay_lan);
-        lanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Navigation.findNavController(view)
-                        .navigate(R.id.action_mainFragment_to_chessGameFragment);
-            }
+        View aiButton = view.findViewById(R.id.button_gameplay_ai);
+        aiButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putInt("mode", Constants.AI_MODE);
+            Navigation.findNavController(view)
+                    .navigate(R.id.action_mainFragment_to_chessGameFragment, bundle);
         });
     }
 }

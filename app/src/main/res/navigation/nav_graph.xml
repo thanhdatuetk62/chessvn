@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="vn.edu.chess.MainFragment"
+        android:name="vn.edu.chessUI.MainFragment"
         android:label="fragment_main"
         tools:layout="@layout/fragment_main">
         <action
@@ -20,9 +20,13 @@
     </fragment>
     <fragment
         android:id="@+id/chessGameFragment"
-        android:name="vn.edu.chess.ChessGameFragment"
+        android:name="vn.edu.chessUI.ChessGameFragment"
         android:label="fragment_chess_game"
-        tools:layout="@layout/fragment_chess_game" />
+        tools:layout="@layout/fragment_chess_game" >
+        <argument
+            android:name="mode"
+            app:argType="integer" />
+    </fragment>
     <action
         android:id="@+id/action_global_mainFragment"
         app:destination="@id/mainFragment"

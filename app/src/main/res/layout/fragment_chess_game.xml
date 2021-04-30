@@ -19,28 +19,31 @@
         android:layout_weight="2"
         android:gravity="center_vertical"
         android:orientation="horizontal">
+
         <ImageView
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:src="@drawable/ic_flag_24px" />
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:text="Opponent"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="4"
-            android:text="10:20"
-            android:textSize="40sp"
             android:gravity="end"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:text="10:20"
+            android:textSize="40sp" />
     </LinearLayout>
 
-    <vn.edu.chess.ChessLayout
+    <vn.edu.chessUI.ChessLayout
         android:id="@+id/fragment_chessboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -49,67 +52,93 @@
         android:id="@+id/game_controller"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:minHeight="50dp">
+        android:minHeight="50dp"
+        android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/button_reverse"
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_reverse" />
+            android:background="@color/white"
+            android:layout_weight="1">
 
-        <ImageButton
-            android:id="@+id/button_undo"
+            <ImageButton
+                android:id="@+id/button_reverse"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_reverse" />
+        </FrameLayout>
+
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_redo" />
+            android:background="@color/white"
+            android:layout_weight="1">
 
-        <ImageButton
-            android:layout_weight="1"
-            android:id="@+id/button_redo"
+            <ImageButton
+                android:id="@+id/button_undo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_redo" />
+        </FrameLayout>
+
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_undo" />
+            android:background="@color/white"
+            android:layout_weight="1">
 
-        <ImageButton
-            android:layout_weight="1"
-            android:id="@+id/button_more_actions"
+            <ImageButton
+                android:id="@+id/button_redo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_undo" />
+        </FrameLayout>
+
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_gear_option" />
+            android:background="@color/white"
+            android:layout_weight="1">
 
+            <ImageButton
+                android:id="@+id/button_more_actions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_gear_option" />
+        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:layout_weight="2">
+        android:layout_weight="2"
+        android:gravity="center_vertical">
+
         <ImageView
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:src="@drawable/ic_outlined" />
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:text="You"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="4"
-            android:text="5:06"
-            android:textSize="40sp"
             android:gravity="end"
-            android:padding="10dp" />
+            android:padding="10dp"
+            android:text="5:06"
+            android:textSize="40sp" />
     </LinearLayout>
 
 </LinearLayout>

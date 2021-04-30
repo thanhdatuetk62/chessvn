@@ -1,4 +1,4 @@
-package vn.edu.chess;
+package vn.edu.chessUI;
 
 import android.util.Log;
 import android.util.Pair;
