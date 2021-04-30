@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ChessBoardFragment">
+    tools:context=".views.ChessBoardFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,50 +13,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -71,50 +71,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -129,50 +129,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -187,50 +187,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -245,50 +245,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -303,50 +303,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -361,50 +361,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -419,50 +419,50 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square"
             tools:ignore="NestedWeights" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/light_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/dark_square" />
 
-        <vn.edu.chessUI.ChessCellView
+        <vn.edu.chessUI.views.ChessCellView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

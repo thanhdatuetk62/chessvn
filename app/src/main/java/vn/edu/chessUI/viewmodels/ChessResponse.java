@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.viewmodels;
 
 import androidx.core.util.Pair;
 
@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import chessLogic.ChessMovement;
 import chessLogic.Coordination;
-import chessLogic.PairCells;
 
 public class ChessResponse {
     private OneNightEvent<ArrayList<Pair<String, Coordination>>> mPieceLocations;

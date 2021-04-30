@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ChessGameFragment">
+    tools:context=".views.ChessGameFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -43,7 +43,7 @@
             android:textSize="40sp" />
     </LinearLayout>
 
-    <vn.edu.chessUI.ChessLayout
+    <vn.edu.chessUI.views.ChessLayout
         android:id="@+id/fragment_chessboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

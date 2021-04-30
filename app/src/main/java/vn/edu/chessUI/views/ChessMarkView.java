@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,6 +6,9 @@ import androidx.appcompat.widget.AppCompatImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import vn.edu.chessUI.Constants;
+import vn.edu.chessUI.R;
 
 
 public class ChessMarkView extends AppCompatImageView {
@@ -39,6 +42,9 @@ public class ChessMarkView extends AppCompatImageView {
                 break;
             case Constants.PROMOTE_MARK_TAG:
                 resID = R.drawable.mark_promote;
+                break;
+            case Constants.CHECK_MARK_TAG:
+                resID = R.drawable.mark_check;
                 break;
         }
         setImageResource(resID);

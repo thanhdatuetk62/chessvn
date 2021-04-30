@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.viewmodels;
 
 public class ChessControl {
     private boolean mOptionHL;

@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

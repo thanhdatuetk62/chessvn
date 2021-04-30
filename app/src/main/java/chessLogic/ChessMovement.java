@@ -16,18 +16,22 @@ public class ChessMovement {
         mCausalMoves = new ArrayList<>();
     }
 
-    public void setActive(Coordination src, Coordination trg) {
+    public void setActive(int x1, int y1, int x2, int y2) {
+        Coordination src = new Coordination(x1, y1);
+        Coordination trg = new Coordination(x2, y2);
         mActiveMove = new PairCells(src, trg);
+    }
+
+    public void addMove(int x1, int y1, int x2, int y2) {
+        Coordination src = new Coordination(x1, y1);
+        Coordination trg = new Coordination(x2, y2);
+        mCausalMoves.add(new PairCells(src, trg));
     }
 
     public PairCells getActive() {return mActiveMove;}
 
-    public ArrayList<PairCells> getCausal() {return mCausalMoves;}
-
     public ArrayList<PairCells> getAllMoves() {
-        ArrayList<PairCells> all = new ArrayList<>(mCausalMoves);
-        all.add(mActiveMove);
-        return all;
+        return mCausalMoves;
     }
 
     public void setPromotion(String pieceCode) {

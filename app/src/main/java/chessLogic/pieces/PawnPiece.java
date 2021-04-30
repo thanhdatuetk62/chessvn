@@ -1,4 +1,8 @@
-package chessLogic;
+package chessLogic.pieces;
+
+import chessLogic.ChessModel;
+import chessLogic.Constants;
+import chessLogic.GameState;
 
 public class PawnPiece extends ChessPiece {
     public PawnPiece(char color) {
@@ -7,16 +11,14 @@ public class PawnPiece extends ChessPiece {
     }
 
     @Override
-    public boolean canMove(int x1, int y1, int x2, int y2, ChessModel model) {
-        if (!super.canMove(x1, y1, x2, y2, model))
-            return false;
+    public boolean canMove(int x1, int y1, int x2, int y2, GameState state) {
         // Define only pawn logic
         int vecX = x2 - x1;
         int vecY = y2 - y1;
         int absX = Math.abs(vecX);
         int absY = Math.abs(vecY);
         int direct = (mColor == Constants.WHITE_COLOR ? -1 : 1);
-        ChessPiece trgPiece = model.getPieceAt(x2, y2);
+        ChessPiece trgPiece = state.getPieceAt(x2, y2);
         if (vecX * direct < 0) {
             // Pawns cannot move backward until promoted
             return false;
@@ -51,7 +53,7 @@ public class PawnPiece extends ChessPiece {
                 return false;
             }
             // Check obstacle
-            if (model.getPieceAt(x1 + direct, y1) != null || trgPiece != null)
+            if (state.getPieceAt(x1 + direct, y1) != null || trgPiece != null)
                 return false;
             // OK move it
             return true;

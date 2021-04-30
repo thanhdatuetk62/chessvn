@@ -1,4 +1,8 @@
-package chessLogic;
+package chessLogic.pieces;
+
+import chessLogic.ChessModel;
+import chessLogic.Constants;
+import chessLogic.GameState;
 
 public class KnightPiece extends ChessPiece {
     public KnightPiece(char color) {
@@ -7,16 +11,14 @@ public class KnightPiece extends ChessPiece {
     }
 
     @Override
-    public boolean canMove(int x1, int y1, int x2, int y2, ChessModel model) {
-        if (!super.canMove(x1, y1, x2, y2, model))
-            return false;
+    public boolean canMove(int x1, int y1, int x2, int y2, GameState state) {
         int absX = Math.abs(x2 - x1);
         int absY = Math.abs(y2 - y1);
         if (absX * absY != 2) {
             return false;
         }
         // Check if there is a piece in trg location
-        ChessPiece trgPiece = model.getPieceAt(x2, y2);
+        ChessPiece trgPiece = state.getPieceAt(x2, y2);
         if (trgPiece != null) {
             // No traitor please :)
             if (!isEnemy(trgPiece)) {

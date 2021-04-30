@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -25,6 +25,10 @@ import java.util.Locale;
 import chessLogic.ChessMovement;
 import chessLogic.Coordination;
 import chessLogic.PairCells;
+import vn.edu.chessUI.viewmodels.ChessResponse;
+import vn.edu.chessUI.viewmodels.ChessViewModel;
+import vn.edu.chessUI.Constants;
+import vn.edu.chessUI.R;
 
 public class ChessBoardFragment extends Fragment {
     private final ChessCellView[][] mCells = new ChessCellView[Constants.SIZE][Constants.SIZE];

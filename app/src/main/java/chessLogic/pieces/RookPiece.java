@@ -1,4 +1,8 @@
-package chessLogic;
+package chessLogic.pieces;
+
+import chessLogic.ChessModel;
+import chessLogic.Constants;
+import chessLogic.GameState;
 
 public class RookPiece extends ChessPiece {
     public RookPiece(char color) {
@@ -7,9 +11,7 @@ public class RookPiece extends ChessPiece {
     }
 
     @Override
-    public boolean canMove(int x1, int y1, int x2, int y2, ChessModel model) {
-        if (!super.canMove(x1, y1, x2, y2, model))
-            return false;
+    public boolean canMove(int x1, int y1, int x2, int y2, GameState state) {
         int absX = Math.abs(x2 - x1);
         int absY = Math.abs(y2 - y1);
         if (absX * absY > 0) {
@@ -20,7 +22,7 @@ public class RookPiece extends ChessPiece {
         if (absX == 0) {
             int sign = (y2 > y1 ? 1 : -1);
             for (int i = y1 + sign; i != y2; i += sign) {
-                if (model.getPieceAt(x2, i) != null) {
+                if (state.getPieceAt(x2, i) != null) {
                     return false;
                 }
             }
@@ -28,13 +30,13 @@ public class RookPiece extends ChessPiece {
         if (absY == 0) {
             int sign = (x2 > x1 ? 1 : -1);
             for (int i = x1 + sign; i != x2; i += sign) {
-                if (model.getPieceAt(i, y1) != null) {
+                if (state.getPieceAt(i, y1) != null) {
                     return false;
                 }
             }
         }
         // Check if there is a piece in trg location
-        ChessPiece trgPiece = model.getPieceAt(x2, y2);
+        ChessPiece trgPiece = state.getPieceAt(x2, y2);
         if (trgPiece != null) {
             // No traitor please :)
             if (!isEnemy(trgPiece)) {

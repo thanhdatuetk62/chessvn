@@ -26,4 +26,5 @@ public class Constants {
     public static final int CAPTURE_MARK_TAG = 2;
     public static final int OCCUPY_MARK_TAG = 3;
     public static final int PROMOTE_MARK_TAG = 4;
+    public static final int CHECK_MARK_TAG = 5;
 }

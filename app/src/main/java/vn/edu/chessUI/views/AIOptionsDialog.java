@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.views;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,6 +13,8 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+
+import vn.edu.chessUI.R;
 
 public class AIOptionsDialog extends DialogFragment {
     @NonNull

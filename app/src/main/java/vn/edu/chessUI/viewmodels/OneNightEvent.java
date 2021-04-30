@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.viewmodels;
 
 public class OneNightEvent<T> {
     private boolean received = false;

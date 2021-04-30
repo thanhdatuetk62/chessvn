@@ -1,4 +1,4 @@
-package vn.edu.chessUI;
+package vn.edu.chessUI.viewmodels;
 
 import android.util.Log;
 import androidx.core.util.Pair;
@@ -13,6 +13,7 @@ import chessLogic.ChessModel;
 import chessLogic.ChessMovement;
 import chessLogic.Coordination;
 import chessLogic.PairCells;
+import vn.edu.chessUI.Constants;
 
 public class ChessViewModel extends ViewModel {
     private final ChessModel mModel;
@@ -21,8 +22,9 @@ public class ChessViewModel extends ViewModel {
     private final MutableLiveData<ChessResponse> mLiveDataResponse;
     private final MutableLiveData<ChessControl> mLiveDataControl;
     private Pair<Integer, Integer> mLastCell;
+    private ArrayList<Pair<Integer, Coordination>> mCheckMarks;
     private PairCells mLastActive;
-    private int mUserColor = Constants.WHITE_PERSPECTIVE;
+    private char mUserColor = Constants.WHITE_COLOR;
 
     public ChessViewModel() {
         // Initialize chess logic (model)
@@ -67,7 +69,7 @@ public class ChessViewModel extends ViewModel {
         // Update UI with new game setup
         mModel.newGame();
         // Get necessary info to update UI
-        mUserColor = userColor;
+        mUserColor = Constants.COLORS[userColor];
         mResponse = new ChessResponse();
         mResponse.setPieceLocations(mModel.getPieceLocations());
         // Call Update UI method
@@ -135,6 +137,9 @@ public class ChessViewModel extends ViewModel {
                 } else {
                     mLastCell = null;
                     clearMarksExceptHistory();
+                    // Preserve check marks
+                    if (mCheckMarks != null)
+                        mResponse.getMarks().addAll(mCheckMarks);
                 }
             }
         }
@@ -161,7 +166,7 @@ public class ChessViewModel extends ViewModel {
     private void userSuggest(int x, int y) {
         // Called when user want to get suggestions of moves, only used by selectSquare internally
         // NOTE: Suggestion marks will be on top of history marks
-        ArrayList<Pair<Integer, Coordination>> marks = new ArrayList<>();
+        ArrayList<Pair<Integer, Coordination>> marks = mModel.getSuggestions(x, y);
         // Selection mark
         marks.add(new Pair<>(Constants.SELECT_MARK_TAG, new Coordination(x, y)));
         // History marks
@@ -169,10 +174,9 @@ public class ChessViewModel extends ViewModel {
             marks.add(new Pair<>(Constants.HISTORY_MARK_TAG, mLastActive.src));
             marks.add(new Pair<>(Constants.HISTORY_MARK_TAG, mLastActive.trg));
         }
-        // Suggestions marks
-        ArrayList<Pair<Integer, Coordination>> suggestionMarks = mModel.getSuggestions(x, y);
-        marks.addAll(suggestionMarks);
-        // Renew marks on response object
+        // Preserve check marks
+        if (mCheckMarks != null)
+            marks.addAll(mCheckMarks);
         mResponse.setMarks(marks);
     }
 
@@ -183,7 +187,7 @@ public class ChessViewModel extends ViewModel {
     private int transform(int x) {
         // Called when to translate from UI location to Logic location or vice versa
         // Must be called each time UI requests data from ViewModel
-        if (mUserColor == Constants.BLACK_PERSPECTIVE) {
+        if (mUserColor == Constants.BLACK_COLOR) {
             return Constants.SIZE - 1 - x;
         } else {
             return x;
@@ -206,7 +210,7 @@ public class ChessViewModel extends ViewModel {
         updateUI();
     }
 
-    public int getUserColor() {
+    public char getUserColor() {
         return mUserColor;
     }
 
@@ -215,6 +219,10 @@ public class ChessViewModel extends ViewModel {
         // Send back to chess model
         ArrayList<Pair<String, Coordination>> locations = mModel.postMove(movements);
         mResponse.setPieceLocations(locations);
+        // Get list of additional marks after confirmMove
+        // and append these mark to current marks
+        mCheckMarks = mModel.checkMarks();
+        mResponse.getMarks().addAll(mCheckMarks);
         // Update UI
         updateUI();
     }
