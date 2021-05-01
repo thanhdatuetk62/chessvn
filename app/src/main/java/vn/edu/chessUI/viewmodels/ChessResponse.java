@@ -11,11 +11,6 @@ public class ChessResponse {
     private OneNightEvent<ArrayList<Pair<String, Coordination>>> mPieceLocations;
     private OneNightEvent<ChessMovement> mMovements;
     private ArrayList<Pair<Integer, Coordination>> mMarks;
-    private boolean mPromote;
-
-    public ChessResponse() {
-        mPromote = false;
-    }
 
     public void setPieceLocations(ArrayList<Pair<String, Coordination>> locations) {
         mPieceLocations = new OneNightEvent<>(locations);
@@ -27,10 +22,6 @@ public class ChessResponse {
 
     public void setMarks(ArrayList<Pair<Integer, Coordination>> marks) {
         mMarks = marks;
-    }
-
-    public void setPromote(boolean o) {
-        mPromote = o;
     }
 
     public ChessMovement getMovements() {

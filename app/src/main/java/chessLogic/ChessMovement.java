@@ -1,7 +1,5 @@
 package chessLogic;
 
-import androidx.core.util.Pair;
-
 import java.util.ArrayList;
 
 public class ChessMovement {
@@ -9,8 +7,9 @@ public class ChessMovement {
     // It can be only created by the ChessModel
     private PairCells mActiveMove;
     private final ArrayList<PairCells> mCausalMoves;
-    private String promotePiece;
-    private boolean hasPromote;
+    private Coordination mPromoteLocation;
+    private String mPromotePiece;
+    private char mPromoteSide;
 
     public ChessMovement() {
         mCausalMoves = new ArrayList<>();
@@ -28,17 +27,30 @@ public class ChessMovement {
         mCausalMoves.add(new PairCells(src, trg));
     }
 
-    public PairCells getActive() {return mActiveMove;}
+    public PairCells getActive() {
+        return mActiveMove;
+    }
 
     public ArrayList<PairCells> getAllMoves() {
         return mCausalMoves;
     }
 
+    public void notifyPromotion(char color, Coordination coo) {
+        mPromoteSide = color;
+        mPromoteLocation = coo;
+    }
+
+    public char getPromoteSide() {
+        return mPromoteSide;
+    }
+
     public void setPromotion(String pieceCode) {
-        promotePiece = pieceCode;
+        mPromotePiece = pieceCode;
     }
 
     public String getPromotion() {
-        return promotePiece;
+        return mPromotePiece;
     }
+
+    public Coordination getPromoteLocation() { return mPromoteLocation; }
 }

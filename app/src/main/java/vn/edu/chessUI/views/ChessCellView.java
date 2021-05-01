@@ -2,7 +2,9 @@ package vn.edu.chessUI.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+
 import androidx.core.util.Pair;
+
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import androidx.annotation.Nullable;
 
 public class ChessCellView extends FrameLayout {
     private Pair<Integer, Integer> mLocation;
+
     public ChessCellView(Context context) {
         super(context);
     }
@@ -29,5 +32,5 @@ public class ChessCellView extends FrameLayout {
 
     public Pair<Integer, Integer> getLocation() {
         return mLocation;
-    };
+    }
 }

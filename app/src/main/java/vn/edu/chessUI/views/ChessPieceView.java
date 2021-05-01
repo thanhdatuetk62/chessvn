@@ -3,6 +3,7 @@ package vn.edu.chessUI.views;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Pair;
+
 import androidx.appcompat.widget.AppCompatImageView;
 
 import androidx.annotation.NonNull;
@@ -10,7 +11,8 @@ import androidx.annotation.Nullable;
 
 
 public class ChessPieceView extends AppCompatImageView {
-    private Pair<Integer, Integer> mLocation;
+    private String mPieceCode;
+
     public ChessPieceView(Context context) {
         super(context);
     }
@@ -30,5 +32,10 @@ public class ChessPieceView extends AppCompatImageView {
         // Load image
         setImageResource(getResources().getIdentifier(
                 imageName, "drawable", getContext().getPackageName()));
+        mPieceCode = pieceCode;
+    }
+
+    public String getPieceCode() {
+        return mPieceCode;
     }
 }

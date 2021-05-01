@@ -5,6 +5,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -13,9 +15,14 @@ import androidx.core.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -25,6 +32,7 @@ import java.util.Locale;
 import chessLogic.ChessMovement;
 import chessLogic.Coordination;
 import chessLogic.PairCells;
+import chessLogic.pieces.ChessPiece;
 import vn.edu.chessUI.viewmodels.ChessResponse;
 import vn.edu.chessUI.viewmodels.ChessViewModel;
 import vn.edu.chessUI.Constants;
@@ -34,6 +42,8 @@ public class ChessBoardFragment extends Fragment {
     private final ChessCellView[][] mCells = new ChessCellView[Constants.SIZE][Constants.SIZE];
     private ViewGroup mBoard;
     private ChessViewModel model;
+    private AlertDialog mPromoteOptions;
+    private ViewGroup mPromoteLayout;
 
     public ChessBoardFragment() {
         // Required empty public constructor
@@ -67,6 +77,15 @@ public class ChessBoardFragment extends Fragment {
         setCellInteraction(true);
         // Create observer
         model.getResponse().observe(getViewLifecycleOwner(), this::handleResponse);
+        // Inflate promotion dialog
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View dialog = inflater.inflate(R.layout.dialog_promote_options, null);
+        mPromoteOptions = new AlertDialog.Builder(requireActivity())
+                .setView(dialog)
+                .create();
+        mPromoteOptions.setCanceledOnTouchOutside(false);
+        // Link to this view
+        mPromoteLayout = (ViewGroup) dialog;
     }
 
     private void setCellInteraction(boolean enabled) {
@@ -114,26 +133,6 @@ public class ChessBoardFragment extends Fragment {
         return view.getY() + getY((View) view.getParent());
     }
 
-    private ChessPieceView placePiece(String pieceCode, int x, int y) {
-        ChessPieceView piece = new ChessPieceView(requireActivity());
-        // Set piece type
-        piece.setPieceType(pieceCode);
-        // Place image into frame at specified location
-        mCells[x][y].addView(piece);
-        return piece;
-    }
-
-    private void removePiece(int x, int y) {
-        ChessPieceView piece = getPiece(x, y);
-        if (piece == null) {
-            String message = String.format(Locale.ENGLISH,
-                    "Cannot removePiece because the cell at (%d, %d) is empty!", x, y);
-            Log.d("TEST", message);
-            return;
-        }
-        mCells[x][y].removeView(piece);
-    }
-
     private ChessMarkView addMark(int x, int y, int type) {
         ChessMarkView mark = new ChessMarkView(requireActivity());
         // Set mark type
@@ -166,25 +165,35 @@ public class ChessBoardFragment extends Fragment {
         }
     }
 
-    private void clearPieces() {
-        for (int r = 0; r < Constants.SIZE; r++) {
-            for (int c = 0; c < Constants.SIZE; c++) {
+    private void setPieces(String[][] locations) {
+        for(int r=0; r<Constants.SIZE; r++) {
+            for(int c=0; c<Constants.SIZE; c++) {
+                String newCode = locations[r][c];
                 ChessPieceView piece = getPiece(r, c);
-                while (piece != null) {
+                if (newCode == null) {
+                    // Remove pieces in this location
                     mCells[r][c].removeView(piece);
-                    piece = getPiece(r, c);
+                } else if (piece == null) {
+                    // No piece resides on this cell, so I create a new one and add it into the cell
+                    piece = new ChessPieceView(requireActivity());
+                    piece.setPieceType(newCode);
+                    mCells[r][c].addView(piece);
+                } else if (!piece.getPieceCode().equals(newCode)) {
+                    // Change pieces image :)
+                    piece.setPieceType(newCode);
                 }
             }
         }
     }
 
     private void setPieces(ArrayList<Pair<String, Coordination>> locations) {
-        clearPieces();
+        String[][] pieceCodes = new String[Constants.SIZE][Constants.SIZE];
         for (Pair<String, Coordination> obj : locations) {
             String pieceCode = obj.first;
             Pair<Integer, Integer> coordination = obj.second.getTrueCoordination(model.getUserColor());
-            placePiece(pieceCode, coordination.first, coordination.second);
+            pieceCodes[coordination.first][coordination.second] = pieceCode;
         }
+        setPieces(pieceCodes);
     }
 
     private void setMarks(ArrayList<Pair<Integer, Coordination>> marks) {
@@ -225,9 +234,32 @@ public class ChessBoardFragment extends Fragment {
             public void onAnimationEnd(Animator animation) {
                 // Remove source piece from overlay view
                 mBoard.getOverlay().remove(srcPiece);
+                // Override
+                srcPiece.setTranslationX(0);
+                srcPiece.setTranslationY(0);
+                mCells[x2][y2].removeView(trgPiece);
+                mCells[x2][y2].addView(srcPiece);
             }
         });
         return animator;
+    }
+
+    private void showPromoteDialog(ChessMovement movement) {
+        char[] codes = {'Q', 'R', 'N', 'B'};
+        // Get layout
+        for (int i=0; i<mPromoteLayout.getChildCount(); i++) {
+            ChessPieceView piece = (ChessPieceView) mPromoteLayout.getChildAt(i);
+            piece.setPieceType("" + movement.getPromoteSide() + codes[i]);
+            piece.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    movement.setPromotion(piece.getPieceCode());
+                    model.confirmMove(movement);
+                    mPromoteOptions.dismiss();
+                }
+            });
+        }
+        mPromoteOptions.show();
     }
 
     private void handleResponse(ChessResponse response) {
@@ -259,15 +291,28 @@ public class ChessBoardFragment extends Fragment {
                 }
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    // Send confirm movement back to viewModel when animations ended
-                    model.confirmMove(movements);
+                    // Handle promotion before send confirmation to the model
+                    char promoteSide = movements.getPromoteSide();
+                    if (promoteSide == Constants.WHITE_COLOR || promoteSide == Constants.BLACK_COLOR) {
+                        // Wait user to choose promotion piece before sending confirmation to model
+                        showPromoteDialog(movements);
+                    } else {
+                        // Send confirm movement back to viewModel when animations ended
+                        model.confirmMove(movements);
+                    }
                     // Enable tapping again
                     setCellInteraction(true);
                 }
                 @Override
                 public void onAnimationCancel(Animator animation) {
-                    // Send confirm movement back to viewModel when animations cancelled
-                    model.confirmMove(movements);
+                    // Handle promotion before send confirmation to the model
+                    char promoteSide = movements.getPromoteSide();
+                    if (promoteSide == Constants.WHITE_COLOR || promoteSide == Constants.BLACK_COLOR) {
+                        showPromoteDialog(movements);
+                    } else {
+                        // Send confirm movement back to viewModel when animations ended
+                        model.confirmMove(movements);
+                    }
                     // Enable tapping again
                     setCellInteraction(true);
                 }

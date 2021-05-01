@@ -72,6 +72,11 @@ public class ChessViewModel extends ViewModel {
         mUserColor = Constants.COLORS[userColor];
         mResponse = new ChessResponse();
         mResponse.setPieceLocations(mModel.getPieceLocations());
+        // Init/clear all marks
+        mLastActive = null;
+        mCheckMarks = null;
+        mLastCell = null;
+        mResponse.setMarks(new ArrayList<>());
         // Call Update UI method
         updateUI();
         // Turn off all highlights in control panel

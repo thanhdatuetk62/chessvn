@@ -15,17 +15,12 @@ import chessLogic.pieces.RookPiece;
 public class ChessModel {
     private GameState mState;
     protected char curColor;
-    private int mBKChecks;
-    private int mWKChecks;
-    private boolean mBKDirty;
-    private boolean mWKDirty;
 
     public ChessModel() {
         mState = new GameState();
     }
 
     public void loadCheckpoint(String checkpoint) {
-        // NotImplementedError!
         throw new UnsupportedOperationException("Load checkpoint has not been implemented yet!");
     }
 
@@ -39,8 +34,6 @@ public class ChessModel {
 
     public void newGame() {
         curColor = Constants.WHITE_COLOR;
-        mBKChecks = mWKChecks = 0;
-        mBKDirty = mWKDirty = false;
         mState.newGame();
     }
 
@@ -92,7 +85,45 @@ public class ChessModel {
 
     public ChessMovement preMove(int x1, int y1, int x2, int y2) {
         ChessMovement movement = new ChessMovement();
+        // Active is the pair contain two cells which user tapped recently
         movement.setActive(x1, y1, x2, y2);
+        // Now have to add real moves for animation (if need)
+        // 1. Need to recognize Casting cases [hard code - I think]
+        ChessPiece srcPiece = getPieceAt(x1, y1);
+        ChessPiece trgPiece = getPieceAt(x2, y2);
+        if (srcPiece instanceof KingPiece && trgPiece instanceof RookPiece && !srcPiece.isEnemy(trgPiece)) {
+            // This is castling case
+            if (x1 != x2) {
+                // Conflict? WTF?
+                throw new RuntimeException(String.format("Conflict Castling Logic in case (%d, %d) -> (%d, %d)", x1, y1, x2, y2));
+            }
+            if (y1 - y2 == 3) {
+                // King side Castling
+                // Move king
+                movement.addMove(x1, y1, x1, y1 - 2);
+                // Move rook
+                movement.addMove(x2, y2, x2, y1 - 1);
+            } else {
+                // Queen side Castling
+                // Move king
+                movement.addMove(x1, y1, x1, y1 + 2);
+                // Move rook
+                movement.addMove(x2, y2, x2, y1 + 1);
+            }
+            return movement;
+        }
+        // 2. Need to recognize Promotion cases [still hard code]
+        if (srcPiece instanceof PawnPiece) {
+            if (srcPiece.getColor() == Constants.WHITE_COLOR && x2 == 0) {
+                // White side promotion
+                movement.notifyPromotion(Constants.WHITE_COLOR, new Coordination(x2, y2));
+            }
+            if (srcPiece.getColor() == Constants.BLACK_COLOR && x2 == Constants.SIZE - 1) {
+                // Black side promotion
+                movement.notifyPromotion(Constants.BLACK_COLOR, new Coordination(x2, y2));
+            }
+        }
+        // 3. Else perform normal move (like active move)
         movement.addMove(x1, y1, x2, y2);
         return movement;
     }
@@ -153,16 +184,13 @@ public class ChessModel {
         // Get king locations
         Coordination bkLoc = state.getKingLocation(Constants.BLACK_COLOR);
         Coordination wkLoc = state.getKingLocation(Constants.WHITE_COLOR);
-        // Check threaten from the opponent side
-        KingPiece bk = (KingPiece) state.getPieceAt(bkLoc);
-        KingPiece wk = (KingPiece) state.getPieceAt(wkLoc);
         // White king is being threaten
-        if (bk.isThreaten(bkLoc.mX, bkLoc.mY, state)) {
-            marks.add(new Pair<>(Constants.CHECK_MARK_TAG, bkLoc));
+        if (state.isWhiteThreaten()) {
+            marks.add(new Pair<>(Constants.CHECK_MARK_TAG, wkLoc));
         }
         // Black king is being threaten
-        if (wk.isThreaten(wkLoc.mX, wkLoc.mY, state)) {
-            marks.add(new Pair<>(Constants.CHECK_MARK_TAG, wkLoc));
+        if (state.isBlackThreaten()) {
+            marks.add(new Pair<>(Constants.CHECK_MARK_TAG, bkLoc));
         }
         return marks;
     }

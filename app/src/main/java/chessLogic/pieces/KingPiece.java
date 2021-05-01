@@ -17,17 +17,39 @@ public class KingPiece extends ChessPiece {
 
     @Override
     public boolean canMove(int x1, int y1, int x2, int y2, GameState state) {
+        // Check if there is a piece in trg location
+        ChessPiece trgPiece = state.getPieceAt(x2, y2);
+
+        // Castling situation
+        if (x1 == x2 && trgPiece instanceof RookPiece && trgPiece.getColor() == mColor) {
+            if (y1 - y2 == 3 && state.canCastling(mColor, 0)) {
+                // King side castling
+                // Check no obstacle in the route
+                for (int y = y2 + 1; y < y1; y++) {
+                    if (state.getPieceAt(x1, y) != null)
+                        return false;
+                }
+                return true;
+            }
+            if (y2 - y1 == 4 && state.canCastling(mColor, 1)) {
+                // Queen side castling
+                // Check no obstacle in the route
+                for (int y = y1 + 1; y < y2; y++) {
+                    if (state.getPieceAt(x1, y) != null)
+                        return false;
+                }
+                return true;
+            }
+        }
+
+        // Normal situation
         int absX = Math.abs(x2 - x1);
         int absY = Math.abs(y2 - y1);
-
         if (absX > 1 || absY > 1)
             return false;
 
-        // Check if there is a piece in trg location
-        ChessPiece trgPiece = state.getPieceAt(x2, y2);
         if (trgPiece != null) {
             // No traitor please :)
-            // TODO: Need to check Castling situation
             if (!isEnemy(trgPiece)) {
                 return false;
             }
