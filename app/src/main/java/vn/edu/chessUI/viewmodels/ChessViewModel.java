@@ -1,21 +1,28 @@
 package vn.edu.chessUI.viewmodels;
 
+import android.app.Application;
 import android.util.Log;
+
 import androidx.core.util.Pair;
 
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 
-import chessLogic.ChessModel;
-import chessLogic.ChessMovement;
-import chessLogic.Coordination;
-import chessLogic.PairCells;
-import vn.edu.chessUI.Constants;
+import vn.edu.chessAgent.AgentCallBack;
+import vn.edu.chessAgent.AgentConnector;
+import vn.edu.chessAgent.Result;
+import vn.edu.chessLogic.ChessModel;
+import vn.edu.chessLogic.ChessMovement;
+import vn.edu.chessLogic.Coordination;
+import vn.edu.chessLogic.PairCells;
+import vn.edu.chessUI.ChessApplication;
 
-public class ChessViewModel extends ViewModel {
+import vn.edu.Constants;
+
+public class ChessViewModel extends AndroidViewModel {
     private final ChessModel mModel;
     private ChessResponse mResponse;
     private final ChessControl mControl;
@@ -25,8 +32,11 @@ public class ChessViewModel extends ViewModel {
     private ArrayList<Pair<Integer, Coordination>> mCheckMarks;
     private PairCells mLastActive;
     private char mUserColor = Constants.WHITE_COLOR;
+    private char mAgentColor = Constants.BLACK_COLOR;
+    private AgentConnector agentConnector;
 
-    public ChessViewModel() {
+    public ChessViewModel(Application application) {
+        super(application);
         // Initialize chess logic (model)
         mModel = new ChessModel();
         // Initialize data UI binding (serve for live data)
@@ -34,6 +44,8 @@ public class ChessViewModel extends ViewModel {
         mControl = new ChessControl();
         mLiveDataResponse = new MutableLiveData<>(mResponse);
         mLiveDataControl = new MutableLiveData<>(mControl);
+        // Initialize agent connection
+        agentConnector = new AgentConnector(((ChessApplication) application).executorService);
     }
 
     public void loadModelCheckpoint(int mode) {
@@ -49,7 +61,7 @@ public class ChessViewModel extends ViewModel {
                     mModel.loadCheckpoint(Constants.pathToDisk);
                     // Get necessary state (get user perspective, add labels, ...)
                     //... Not implemented yet
-                    updateUI();
+                    updateUI(false);
                 } catch (Exception e) {
                     Log.d("EXCEPTION", String.valueOf(e));
                     // Create new Game, can choose game level but NOT implemented yet!
@@ -70,6 +82,7 @@ public class ChessViewModel extends ViewModel {
         mModel.newGame();
         // Get necessary info to update UI
         mUserColor = Constants.COLORS[userColor];
+        mAgentColor = Constants.COLORS[userColor ^ 1];
         mResponse = new ChessResponse();
         mResponse.setPieceLocations(mModel.getPieceLocations());
         // Init/clear all marks
@@ -78,11 +91,13 @@ public class ChessViewModel extends ViewModel {
         mLastCell = null;
         mResponse.setMarks(new ArrayList<>());
         // Call Update UI method
-        updateUI();
+        updateUI(false);
         // Turn off all highlights in control panel
         mControl.setOptionHL(false);
         mControl.setRotateHL(false);
         updateControl();
+        // Connect to AI agent
+        agentConnector.connectAI(level, mAgentColor);
     }
 
     public void newLANGame() {
@@ -101,8 +116,11 @@ public class ChessViewModel extends ViewModel {
         mLiveDataControl.setValue(mControl);
     }
 
-    private void updateUI() {
-        mLiveDataResponse.setValue(mResponse);
+    private void updateUI(boolean async) {
+        if (async) {
+            mLiveDataResponse.postValue(mResponse);
+        } else
+            mLiveDataResponse.setValue(mResponse);
     }
 
     public void selectSquare(int x, int y) {
@@ -148,7 +166,7 @@ public class ChessViewModel extends ViewModel {
                 }
             }
         }
-        updateUI();
+        updateUI(false);
     }
 
     private void clearMarksExceptHistory() {
@@ -185,8 +203,36 @@ public class ChessViewModel extends ViewModel {
         mResponse.setMarks(marks);
     }
 
-    public void agentMove(int x1, int y1, int x2, int y2) {
+    public void agentMove() {
         // Called when opponent (agent) perform a move, only used by ChessGameFragment
+        // Send signal to the agent
+        agentConnector.move(mModel.getState(), new AgentCallBack<ChessMovement>() {
+            @Override
+            public void onComplete(Result<ChessMovement> result) {
+                if (result instanceof Result.Success) {
+                    // OK what is the message is?
+                    ChessMovement movement = ((Result.Success<ChessMovement>) result).data;
+                    if (movement != null) {
+                        movement.setOnAir();
+                        mModel.postMove(movement);
+                        ArrayList<Pair<String, Coordination>> locations = mModel.getPieceLocations();
+                        mResponse.setMovements(movement);
+                        mResponse.setPieceLocations(locations);
+                        // Clear marks
+                        mLastActive = mModel.getLastActive();
+                        clearMarksExceptHistory();
+                        // Update UI;
+                        updateUI(true);
+                    } else {
+                        Log.d("TEST", "Not implemented!");
+                    }
+                } else {
+                    // Show Error in Logcat
+                    Exception exception = ((Result.Error<ChessMovement>) result).exception;
+                    Log.e("TEST", String.valueOf(exception));
+                }
+            }
+        });
     }
 
     private int transform(int x) {
@@ -206,13 +252,31 @@ public class ChessViewModel extends ViewModel {
         updateControl();
         // Need to update transformer to update board
         // Update UI
-        updateUI();
+        updateUI(false);
+    }
+
+    public void undo() {
+        ChessMovement movement = mModel.undo();
+        if (movement == null)
+            // No undo avail
+            return;
+        // No model confirm required because it has already updated on the state!
+        movement.setOnAir();
+        movement.revert();
+        ArrayList<Pair<String, Coordination>> locations = mModel.getPieceLocations();
+        mResponse.setMovements(movement);
+        mResponse.setPieceLocations(locations);
+        // Clear marks
+        mLastActive = mModel.getLastActive();
+        clearMarksExceptHistory();
+        // Update UI;
+        updateUI(false);
     }
 
     public void fetchBoard() {
         // Init step, called when enter the game or when config changes such as rotations or device switches
         // Need updateUI after process this function
-        updateUI();
+        updateUI(false);
     }
 
     public char getUserColor() {
@@ -220,7 +284,7 @@ public class ChessViewModel extends ViewModel {
     }
 
     public void confirmMove(ChessMovement movements) {
-        // TODO: Check if there is a need to promotion
+        // NOTE: Can only be used by user, the agent moves will be handled on another method!
         // Send back to chess model
         ArrayList<Pair<String, Coordination>> locations = mModel.postMove(movements);
         mResponse.setPieceLocations(locations);
@@ -229,6 +293,8 @@ public class ChessViewModel extends ViewModel {
         mCheckMarks = mModel.checkMarks();
         mResponse.getMarks().addAll(mCheckMarks);
         // Update UI
-        updateUI();
+        updateUI(false);
+        // Handle the next action of agent move
+        agentMove();
     }
 }

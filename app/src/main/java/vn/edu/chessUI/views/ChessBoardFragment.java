@@ -6,7 +6,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -15,28 +14,22 @@ import androidx.core.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
-import chessLogic.ChessMovement;
-import chessLogic.Coordination;
-import chessLogic.PairCells;
-import chessLogic.pieces.ChessPiece;
+import vn.edu.chessLogic.ChessMovement;
+import vn.edu.chessLogic.Coordination;
+import vn.edu.chessLogic.PairCells;
 import vn.edu.chessUI.viewmodels.ChessResponse;
 import vn.edu.chessUI.viewmodels.ChessViewModel;
-import vn.edu.chessUI.Constants;
 import vn.edu.chessUI.R;
+
+import vn.edu.Constants;
 
 public class ChessBoardFragment extends Fragment {
     private final ChessCellView[][] mCells = new ChessCellView[Constants.SIZE][Constants.SIZE];
@@ -166,8 +159,8 @@ public class ChessBoardFragment extends Fragment {
     }
 
     private void setPieces(String[][] locations) {
-        for(int r=0; r<Constants.SIZE; r++) {
-            for(int c=0; c<Constants.SIZE; c++) {
+        for (int r = 0; r < Constants.SIZE; r++) {
+            for (int c = 0; c < Constants.SIZE; c++) {
                 String newCode = locations[r][c];
                 ChessPieceView piece = getPiece(r, c);
                 if (newCode == null) {
@@ -247,7 +240,7 @@ public class ChessBoardFragment extends Fragment {
     private void showPromoteDialog(ChessMovement movement) {
         char[] codes = {'Q', 'R', 'N', 'B'};
         // Get layout
-        for (int i=0; i<mPromoteLayout.getChildCount(); i++) {
+        for (int i = 0; i < mPromoteLayout.getChildCount(); i++) {
             ChessPieceView piece = (ChessPieceView) mPromoteLayout.getChildAt(i);
             piece.setPieceType("" + movement.getPromoteSide() + codes[i]);
             piece.setOnClickListener(new View.OnClickListener() {
@@ -289,6 +282,7 @@ public class ChessBoardFragment extends Fragment {
                     // Disable user tap for avoid spamming
                     setCellInteraction(false);
                 }
+
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     // Handle promotion before send confirmation to the model
@@ -298,11 +292,16 @@ public class ChessBoardFragment extends Fragment {
                         showPromoteDialog(movements);
                     } else {
                         // Send confirm movement back to viewModel when animations ended
-                        model.confirmMove(movements);
+                        if (movements.isOnAir()) {
+                            if (pieceLocations != null)
+                                setPieces(pieceLocations);
+                        } else
+                            model.confirmMove(movements);
                     }
                     // Enable tapping again
                     setCellInteraction(true);
                 }
+
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     // Handle promotion before send confirmation to the model
@@ -311,7 +310,11 @@ public class ChessBoardFragment extends Fragment {
                         showPromoteDialog(movements);
                     } else {
                         // Send confirm movement back to viewModel when animations ended
-                        model.confirmMove(movements);
+                        if (movements.isOnAir()) {
+                            if (pieceLocations != null)
+                                setPieces(pieceLocations);
+                        } else
+                            model.confirmMove(movements);
                     }
                     // Enable tapping again
                     setCellInteraction(true);

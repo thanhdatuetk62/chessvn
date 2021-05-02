@@ -1,13 +1,12 @@
-package chessLogic.pieces;
+package vn.edu.chessLogic.pieces;
 
 import androidx.core.util.Pair;
 
 import java.util.ArrayList;
 
-import chessLogic.ChessModel;
-import chessLogic.Constants;
-import chessLogic.Coordination;
-import chessLogic.GameState;
+import vn.edu.chessLogic.Coordination;
+import vn.edu.chessLogic.GameState;
+import vn.edu.Constants;
 
 public class KingPiece extends ChessPiece {
     public KingPiece(char color) {

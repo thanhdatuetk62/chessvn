@@ -1,8 +1,7 @@
-package chessLogic.pieces;
+package vn.edu.chessLogic.pieces;
 
-import chessLogic.ChessModel;
-import chessLogic.Constants;
-import chessLogic.GameState;
+import vn.edu.chessLogic.GameState;
+import vn.edu.Constants;
 
 public class PawnPiece extends ChessPiece {
     public PawnPiece(char color) {

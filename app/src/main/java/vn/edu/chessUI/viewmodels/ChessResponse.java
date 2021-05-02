@@ -4,8 +4,8 @@ import androidx.core.util.Pair;
 
 import java.util.ArrayList;
 
-import chessLogic.ChessMovement;
-import chessLogic.Coordination;
+import vn.edu.chessLogic.ChessMovement;
+import vn.edu.chessLogic.Coordination;
 
 public class ChessResponse {
     private OneNightEvent<ArrayList<Pair<String, Coordination>>> mPieceLocations;

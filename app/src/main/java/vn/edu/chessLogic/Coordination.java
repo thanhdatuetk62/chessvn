@@ -1,6 +1,7 @@
-package chessLogic;
+package vn.edu.chessLogic;
 
 import androidx.core.util.Pair;
+import vn.edu.Constants;
 
 public class Coordination {
     protected final int mX;

@@ -1,6 +1,4 @@
-package chessLogic;
-
-import androidx.core.util.Pair;
+package vn.edu.chessLogic;
 
 public class PairCells {
     public final Coordination src;

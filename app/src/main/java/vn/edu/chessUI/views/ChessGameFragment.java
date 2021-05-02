@@ -18,13 +18,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import vn.edu.chessUI.viewmodels.ChessViewModel;
-import vn.edu.chessUI.Constants;
 import vn.edu.chessUI.R;
+
+import vn.edu.Constants;
 
 public class ChessGameFragment extends Fragment {
     private int mode;
     private ChessViewModel model;
     private View mReverseButton;
+    private View mUndoButton;
     private View mOptionsButton;
     private AlertDialog mOptionsDialog;
     private FragmentManager fragmentManager;
@@ -56,6 +58,9 @@ public class ChessGameFragment extends Fragment {
         // Setup for reverse function
         mReverseButton = view.findViewById(R.id.button_reverse);
         mReverseButton.setOnClickListener(v -> onClickRotate());
+        // Setup for undo function
+        mUndoButton = view.findViewById(R.id.button_undo);
+        mUndoButton.setOnClickListener(v -> onClickUndo());
         // Setup for create game function
         mOptionsButton = view.findViewById(R.id.button_more_actions);
         mOptionsButton.setOnClickListener(v -> onClickOptions());
@@ -87,6 +92,10 @@ public class ChessGameFragment extends Fragment {
             case Constants.LAN_MODE:
                 Log.d("TEST", "Cannot initialize LAN Options dialog yet!");
         }
+    }
+
+    private void onClickUndo() {
+        model.undo();
     }
 
     private void initAIDialog() {

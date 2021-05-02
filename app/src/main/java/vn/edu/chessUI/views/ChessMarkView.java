@@ -7,9 +7,9 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import vn.edu.chessUI.Constants;
 import vn.edu.chessUI.R;
 
+import vn.edu.Constants;
 
 public class ChessMarkView extends AppCompatImageView {
 
