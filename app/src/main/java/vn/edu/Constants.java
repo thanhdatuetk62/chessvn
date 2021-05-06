@@ -30,4 +30,7 @@ public class Constants {
     public static final int[] ROOK_X = {0, 0, SIZE-1, SIZE-1};
     public static final int[] ROOK_Y = {0, SIZE-1, 0, SIZE-1};
     public static final int PORT = 6969;
+    public static final int STALEMATE = 0;
+    public static final int CHECKMATE = 1;
+    public static final int NOT_FINISH = -1;
 }

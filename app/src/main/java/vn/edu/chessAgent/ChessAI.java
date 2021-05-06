@@ -30,7 +30,7 @@ public class ChessAI {
     public ChessMovement move(GameState state) throws InterruptedException {
         // Random :)))
         ArrayList<ChessMovement> possibleMoves = state.getAllPossibleMoves();
-//        Thread.sleep(1000);
+//        Thread.sleep(200);
         Log.d("TEST", String.format("Number of moves: %d", possibleMoves.size()));
         return possibleMoves.get(randInt(0, possibleMoves.size()-1));
     }

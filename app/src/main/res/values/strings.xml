@@ -12,6 +12,7 @@
     <string name="wK">chess_wk</string>
     <string name="wQ">chess_wq</string>
     <string name="wP">chess_wp</string>
+    <string name="draw">chess_draw</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="levels">

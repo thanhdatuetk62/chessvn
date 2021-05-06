@@ -266,8 +266,8 @@ public class ChessViewModel extends AndroidViewModel {
 
     public void agentMove() {
         // Called when opponent (agent) perform a move, only used by ChessGameFragment
-        // Send signal to the agent
-        agentConnector.move(mModel.getState(), new AgentCallBack<ChessMovement>() {
+        // Send signal to the agent, copy the state to ensure that the thread is safe!
+        agentConnector.move(mModel.getState().copy(), new AgentCallBack<ChessMovement>() {
             @Override
             public void onComplete(Result<ChessMovement> result) {
                 if (result instanceof Result.Success) {
@@ -363,10 +363,17 @@ public class ChessViewModel extends AndroidViewModel {
         mCheckMarks = mModel.checkMarks();
         mResponse.getMarks().addAll(mCheckMarks);
 
+        int status = mModel.getGameStatus();
+        mResponse.setGameStatus(status);
+
         // Update UI
         updateUI(false);
 
         // Handle the next action of agent move
         agentMove();
+    }
+
+    public char getCurrentTurn() {
+        return mModel.getCurrentTurn();
     }
 }

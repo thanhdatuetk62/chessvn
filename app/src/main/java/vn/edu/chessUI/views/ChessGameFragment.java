@@ -1,18 +1,14 @@
 package vn.edu.chessUI.views;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
-import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,12 +18,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
@@ -35,7 +29,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import vn.edu.chessUI.MultiPlayerBroadcastReceiver;
 import vn.edu.chessUI.OnPeerSelected;
@@ -227,7 +220,7 @@ public class ChessGameFragment extends Fragment {
     private void initAIDialog() {
         // Get inflater
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        mOptionsDialogView = inflater.inflate(R.layout.diaglog_ai_options, null);
+        mOptionsDialogView = inflater.inflate(R.layout.dialog_ai_options, null);
         mOptionsDialog = new AlertDialog.Builder(requireActivity())
                 .setView(mOptionsDialogView)
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {

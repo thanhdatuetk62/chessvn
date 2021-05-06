@@ -6,7 +6,9 @@ import android.util.Log;
 import androidx.core.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import vn.edu.chessLogic.pieces.BishopPiece;
 import vn.edu.chessLogic.pieces.ChessPiece;
@@ -145,18 +147,21 @@ public class GameState {
         // Non-context checking (Only logic)
         if (!piece.canMove(x1, y1, x2, y2, this))
             return false;
+
         // Init return var
         boolean res = true;
+
         // Prevent king threaten checking
-        // Clone new game state with the next move
         ChessMovement movement = createMovement(x1, y1, x2, y2);
         // Emulate the move, will backtrack to preserve origin state
         move(movement);
+
         // Get it's king
-        Coordination kingCoo = getKingLocation(piece.getColor());
-        KingPiece kingPiece = (KingPiece) getPieceAt(kingCoo);
-        if (kingPiece.isThreaten(kingCoo.mX, kingCoo.mY, this))
+        if ((piece.getColor() == Constants.WHITE_COLOR && wThreaten)
+            || (piece.getColor() == Constants.BLACK_COLOR && bThreaten)) {
             res = false;
+        }
+        // Back
         undo();
         return res;
     }
@@ -195,14 +200,6 @@ public class GameState {
             }
         }
         return allMoves;
-    }
-
-    public boolean isValidMove(ChessMovement movement) {
-        return true;
-    }
-
-    public boolean isValidUndo(ChessMovement movement) {
-        return true;
     }
 
     public void move(ChessMovement movement) {
@@ -309,16 +306,11 @@ public class GameState {
             return null;
         }
         ChessMovement movement = mHistory.pop();
-        // Revert threatens and update Casting availability
-        Coordination wkLoc = getKingLocation(Constants.WHITE_COLOR);
-        Coordination bkLoc = getKingLocation(Constants.BLACK_COLOR);
-        KingPiece wkPiece = (KingPiece) getPieceAt(wkLoc);
-        KingPiece bkPiece = (KingPiece) getPieceAt(bkLoc);
-        wThreaten = wkPiece.isThreaten(wkLoc.mX, wkLoc.mY, this);
-        bThreaten = bkPiece.isThreaten(bkLoc.mX, bkLoc.mY, this);
+
         // Update cnt
         wThreatenCnt -= (wThreaten ? 1 : 0);
         bThreatenCnt -= (bThreaten ? 1 : 0);
+
         // Perform REVERT promotion
         // will be ignored when performing suggestions creating or agent interactions
         Coordination promoteLocation = movement.getPromoteLocation();
@@ -327,6 +319,7 @@ public class GameState {
             int x = promoteLocation.mX, y = promoteLocation.mY;
             mState[x][y] = new PawnPiece(movement.getPromoteSide());
         }
+
         // Revert movements
         for (PairCells p : movement.getAllMoves()) {
             Coordination src = p.src;
@@ -334,6 +327,7 @@ public class GameState {
             int x1 = src.mX, y1 = src.mY, x2 = trg.mX, y2 = trg.mY;
             mState[x1][y1] = mState[x2][y2];
             mState[x2][y2] = null;
+
             // Revert corner counters
             for (int i = 0; i < 4; i++) {
                 int x = Constants.ROOK_X[i];
@@ -346,17 +340,28 @@ public class GameState {
                 }
             }
         }
+
+        // Revert threaten
+        Coordination wkLoc = getKingLocation(Constants.WHITE_COLOR);
+        Coordination bkLoc = getKingLocation(Constants.BLACK_COLOR);
+        KingPiece wkPiece = (KingPiece) getPieceAt(wkLoc);
+        KingPiece bkPiece = (KingPiece) getPieceAt(bkLoc);
+        wThreaten = wkPiece.isThreaten(wkLoc.mX, wkLoc.mY, this);
+        bThreaten = bkPiece.isThreaten(bkLoc.mX, bkLoc.mY, this);
+
         // Free captured piece
         ChessPiece capturedPiece = movement.getCapturedPiece();
         Coordination capturedCoo = movement.getCapturedCoordination();
         if (capturedPiece != null && capturedCoo != null) {
             mState[capturedCoo.mX][capturedCoo.mY] = capturedPiece;
         }
+
         // Update castling availability
         wCastling[0] = (wThreatenCnt == 0 && mCornerCnt[2] == 0);
         wCastling[1] = (wThreatenCnt == 0 && mCornerCnt[3] == 0);
         bCastling[0] = (bThreatenCnt == 0 && mCornerCnt[0] == 0);
         bCastling[1] = (bThreatenCnt == 0 && mCornerCnt[1] == 0);
+
         // Switch turn WHITE <-> BLACK
         mColor = (mColor == Constants.WHITE_COLOR ? Constants.BLACK_COLOR : Constants.WHITE_COLOR);
         return movement;
@@ -442,4 +447,31 @@ public class GameState {
             return null;
         return mHistory.peek();
     }
+
+    public int isGameOver() {
+//        Log.d("TEST", String.format("Before: black threaten %s, white threaten %s", bThreaten, wThreaten));
+        for(int x1=0; x1<Constants.SIZE; x1++) {
+            for(int y1=0; y1<Constants.SIZE; y1++) {
+                for(int x2=0; x2<Constants.SIZE; x2++) {
+                    for(int y2=0; y2<Constants.SIZE; y2++) {
+                        ChessPiece piece = getPieceAt(x1, y1);
+                        if (canMove(x1, y1, x2, y2)) {
+                            // Not finished yet
+                            return Constants.NOT_FINISH;
+                        }
+                    }
+                }
+            }
+        }
+//        Log.d("TEST", String.format("After: black threaten %s, white threaten %s", bThreaten, wThreaten));
+
+        if ((mColor == Constants.WHITE_COLOR && wThreaten)
+                || (mColor == Constants.BLACK_COLOR && bThreaten)) {
+            // Checkmate
+            return Constants.CHECKMATE;
+        } else
+            // Stalemate
+            return Constants.STALEMATE;
+    }
+
 }

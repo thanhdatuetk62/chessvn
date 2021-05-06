@@ -138,4 +138,12 @@ public class ChessModel {
         }
         return marks;
     }
+
+    public char getCurrentTurn() {
+        return mState.getCurrentColor();
+    }
+
+    public int getGameStatus() {
+        return mState.isGameOver();
+    }
 }

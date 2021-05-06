@@ -11,16 +11,22 @@ import android.util.Log;
 
 import androidx.core.util.Pair;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
+import java.util.zip.Inflater;
 
 import vn.edu.chessLogic.ChessMovement;
 import vn.edu.chessLogic.Coordination;
@@ -262,6 +268,7 @@ public class ChessBoardFragment extends Fragment {
             // No animations needed, only set piece locations on the board
             if (pieceLocations != null)
                 setPieces(pieceLocations);
+            showGameOverDialog(response.getGameStatus(), model.getCurrentTurn());
         } else {
             // Oh yes that's it. Now have to handle animations!!
             ArrayList<Animator> animators = new ArrayList<>();
@@ -297,6 +304,7 @@ public class ChessBoardFragment extends Fragment {
                                 setPieces(pieceLocations);
                         } else
                             model.confirmMove(movements);
+                        showGameOverDialog(response.getGameStatus(), model.getCurrentTurn());
                     }
                     // Enable tapping again
                     setCellInteraction(true);
@@ -315,6 +323,7 @@ public class ChessBoardFragment extends Fragment {
                                 setPieces(pieceLocations);
                         } else
                             model.confirmMove(movements);
+                        showGameOverDialog(response.getGameStatus(), model.getCurrentTurn());
                     }
                     // Enable tapping again
                     setCellInteraction(true);
@@ -326,6 +335,28 @@ public class ChessBoardFragment extends Fragment {
         ArrayList<Pair<Integer, Coordination>> marks = response.getMarks();
         if (marks != null) {
             setMarks(marks);
+        }
+    }
+
+    private void showGameOverDialog(int status, char color) {
+        if (status != Constants.NOT_FINISH) {
+            LayoutInflater inflater = requireActivity().getLayoutInflater();
+            View dialog = inflater.inflate(R.layout.dialog_game_over, null);
+            TextView tv = dialog.findViewById(R.id.game_over_msg);
+
+            if (status == Constants.CHECKMATE) {
+                if (color == Constants.WHITE_COLOR) {
+                    tv.setText("Checkmate: Black win!");
+                } else {
+                    tv.setText("Checkmate: White win!");
+                }
+            } else if (status == Constants.STALEMATE) {
+                tv.setText("Stalemate! (Draw)");
+            }
+            AlertDialog alertDialog = new AlertDialog.Builder(requireActivity())
+                    .setView(dialog)
+                    .create();
+            alertDialog.show();
         }
     }
 }
