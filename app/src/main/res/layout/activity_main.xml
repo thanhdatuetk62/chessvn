@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             android:alpha="0.1"
             android:scaleType="centerCrop"
-            android:src="@drawable/background_2" />
+            android:src="@drawable/background" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -31,7 +31,7 @@
                 android:background="?attr/colorPrimary"
                 android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
                 app:menu="@menu/menu"
-                app:navigationIcon="@drawable/ic_list_24px"
+                app:navigationIcon="@drawable/ic_list"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:subtitle="Standard"
                 app:title="Offline Chess" />

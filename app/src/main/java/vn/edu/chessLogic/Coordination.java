@@ -1,9 +1,12 @@
 package vn.edu.chessLogic;
 
 import androidx.core.util.Pair;
+
+import java.io.Serializable;
+
 import vn.edu.Constants;
 
-public class Coordination {
+public class Coordination implements Serializable {
     protected final int mX;
     protected final int mY;
 

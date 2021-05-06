@@ -30,8 +30,8 @@ public class ChessModel {
         return mState.getPieceLocations(color);
     }
 
-    public void newGame() {
-        curColor = Constants.WHITE_COLOR;
+    public void newGame(char color) {
+        curColor = color;
         mState.newGame();
     }
 
@@ -53,6 +53,11 @@ public class ChessModel {
 
     public boolean canMove(int x1, int y1, int x2, int y2) {
         // Context checking (Include current turn, king checked, ...)
+        ChessPiece piece = mState.getPieceAt(x1, y1);
+        if (piece != null && piece.getColor() != curColor) {
+            // Opponent is moving, pls wait :)
+            return false;
+        }
         return mState.canMove(x1, y1, x2, y2);
     }
 
@@ -69,11 +74,7 @@ public class ChessModel {
     }
 
     public ChessMovement undo() {
-        ChessMovement movement = mState.undo();
-        // Reverse turn to allow user can move black side - TESTING only
-        if (movement != null)
-            curColor = (curColor == Constants.WHITE_COLOR ? Constants.BLACK_COLOR : Constants.WHITE_COLOR);
-        return movement;
+        return mState.undo();
     }
 
     public ArrayList<Pair<String, Coordination>> getPieceLocations() {

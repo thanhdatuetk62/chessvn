@@ -2,17 +2,19 @@ package vn.edu.chessLogic;
 
 import androidx.core.util.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import vn.edu.chessLogic.pieces.ChessPiece;
 
-public class ChessMovement {
+public class ChessMovement implements Serializable {
     // This class contains info about a single move in chess board.
     // It should be only created by the ChessLogic
     private boolean onAir;
     private PairCells mActiveMove;
     private ArrayList<PairCells> mCausalMoves;
-    private Pair<ChessPiece, Coordination> mCapturedPiece;
+    private ChessPiece mCapturedPiece;
+    private Coordination mCapturedCoordination;
     private Coordination mPromoteLocation;
     private String mPromotePiece;
     private char mPromoteSide;
@@ -24,10 +26,20 @@ public class ChessMovement {
 
     public ChessMovement(ChessMovement other) {
         onAir = other.onAir;
-        mActiveMove = new PairCells(other.mActiveMove.src, other.mActiveMove.trg);
         mCausalMoves = new ArrayList<>(other.mCausalMoves);
-        mCapturedPiece = new Pair<>(other.getCapturedPiece().first, other.getCapturedPiece().second);
-        mPromoteLocation = new Coordination(other.mPromoteLocation.mX, other.mPromoteLocation.mY);
+
+        if (other.mActiveMove != null)
+            mActiveMove = new PairCells(other.mActiveMove.src, other.mActiveMove.trg);
+
+        if (other.mCapturedPiece != null)
+            mCapturedPiece = other.mCapturedPiece;
+
+        if (other.mCapturedCoordination != null)
+            mCapturedCoordination = other.mCapturedCoordination;
+
+        if (other.mPromoteLocation != null)
+            mPromoteLocation = new Coordination(other.mPromoteLocation.mX, other.mPromoteLocation.mY);
+
         mPromotePiece = other.mPromotePiece;
         mPromoteSide = other.mPromoteSide;
     }
@@ -75,20 +87,29 @@ public class ChessMovement {
     }
 
     public void setCapturedPiece(ChessPiece piece, int x, int y) {
-        mCapturedPiece = new Pair<>(piece, new Coordination(x, y));
+        mCapturedPiece = piece;
+        mCapturedCoordination = new Coordination(x, y);
     }
 
-    public Pair<ChessPiece, Coordination> getCapturedPiece() {
+    public ChessPiece getCapturedPiece() {
         return mCapturedPiece;
     }
+
+    public Coordination getCapturedCoordination() {return mCapturedCoordination;}
 
     public String getPromotion() {
         return mPromotePiece;
     }
 
-    public Coordination getPromoteLocation() { return mPromoteLocation; }
+    public Coordination getPromoteLocation() {
+        return mPromoteLocation;
+    }
 
-    public void setOnAir() {onAir = true;}
+    public void setOnAir() {
+        onAir = true;
+    }
 
-    public boolean isOnAir() {return onAir;}
+    public boolean isOnAir() {
+        return onAir;
+    }
 }

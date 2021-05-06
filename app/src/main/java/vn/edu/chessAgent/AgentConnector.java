@@ -1,7 +1,20 @@
 package vn.edu.chessAgent;
 
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.text.method.MovementMethod;
 import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.Executor;
 
 import vn.edu.chessLogic.ChessMovement;
@@ -14,6 +27,8 @@ public class AgentConnector {
     private final Executor executor; // Mostly works relate to background tasks, so we need to use Threading
     private int mode; // Use to distinguish between AI mode and LAN mode
     private ChessAI aiAgent; // For AI mode
+    private InputStream inputStream;
+    private OutputStream outputStream;
 
     public AgentConnector(Executor executor) {
         this.executor = executor;
@@ -26,6 +41,94 @@ public class AgentConnector {
         Log.d("TEST", "Connect to AI successfully!");
     }
 
+    public boolean connectLAN(WifiP2pInfo info) {
+        // Decide which thread to create (Server thread vs. Client thread)
+        mode = Constants.LAN_MODE;
+        String serverAddress = info.groupOwnerAddress.getHostAddress();
+        boolean isServer = info.groupFormed && info.isGroupOwner;
+
+        if (isServer) {
+            // Run server thread!
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ServerSocket serverSocket = new ServerSocket(Constants.PORT);
+                        Socket socket = serverSocket.accept();
+                        // Create tunnel for send/receive data
+                        inputStream = socket.getInputStream();
+                        outputStream = socket.getOutputStream();
+                        Log.d("TEST", "Stream server completed");
+                    } catch (IOException e) {
+                        Log.d("TEST", "Error", e);
+                    }
+                }
+            });
+        } else {
+            // Run client thread!
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("TEST", "This is Client!");
+                    try {
+                        Socket socket = new Socket();
+                        socket.connect(new InetSocketAddress(serverAddress, Constants.PORT));
+                        // Create tunnel for send/receive data
+                        inputStream = socket.getInputStream();
+                        outputStream = socket.getOutputStream();
+                        Log.d("TEST", "Stream client completed");
+                    } catch (IOException e) {
+                        Log.d("TEST", "Error", e);
+                    }
+                }
+            });
+        }
+
+        // All is set
+        return isServer;
+    }
+
+    private byte[] toBytes(ChessMovement movement) {
+        byte[] res = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(bos);
+            out.writeObject(movement);
+            out.flush();
+            res = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return res;
+    }
+
+    private ChessMovement fromBytes(byte[] bytes) {
+        ChessMovement res = null;
+        ObjectInput in = null;
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        try {
+            in = new ObjectInputStream(bis);
+            res = (ChessMovement) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (in != null)
+                    in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return res;
+    }
+
     public Result<ChessMovement> synchronousMove(GameState state) {
         try {
             ChessMovement movement = null;
@@ -34,7 +137,34 @@ public class AgentConnector {
                     movement = aiAgent.move(state);
                     break;
                 case Constants.LAN_MODE:
-                    throw new UnsupportedOperationException("LAN mode has not been implemented yet!");
+                    // Here feed inputStream the data of the last move
+                    // and wait to get the move from opponent
+                    final ChessMovement move = state.getLastMove();
+                    // block until InputStream and OutputStream available
+                    while (inputStream == null || outputStream == null) ;
+                    Log.d("TEST", "IO Streams are ready!");
+                    if (move != null) {
+                        // Convert object to byte array
+                        byte[] bytes = toBytes(move);
+                        try {
+                            // Send data
+                            outputStream.write(bytes);
+                        } catch (IOException e) {
+                            Log.e("TEST", e.getMessage(), e);
+                        }
+                    }
+                    // Listen for the move from opponent
+                    try {
+                        byte[] buffer = new byte[1024];
+                        // Receive data
+                        int rep = inputStream.read(buffer);
+                        if (rep > 0) {
+                            // Convert byte back to object
+                            movement = fromBytes(buffer);
+                        }
+                    } catch (IOException e) {
+                        Log.e("TEST", "Error", e);
+                    }
             }
             return new Result.Success<>(movement);
         } catch (Exception e) {

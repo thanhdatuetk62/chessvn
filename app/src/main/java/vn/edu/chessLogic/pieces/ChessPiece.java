@@ -1,9 +1,11 @@
 package vn.edu.chessLogic.pieces;
 
+import java.io.Serializable;
+
 import vn.edu.chessLogic.GameState;
 import vn.edu.Constants;
 
-public abstract class ChessPiece {
+public abstract class ChessPiece implements Serializable {
     protected char mColor;
     protected char mPieceName;
 

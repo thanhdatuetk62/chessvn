@@ -287,7 +287,7 @@ public class ChessBoardFragment extends Fragment {
                 public void onAnimationEnd(Animator animation) {
                     // Handle promotion before send confirmation to the model
                     char promoteSide = movements.getPromoteSide();
-                    if (promoteSide == Constants.WHITE_COLOR || promoteSide == Constants.BLACK_COLOR) {
+                    if (!movements.isOnAir() && (promoteSide == Constants.WHITE_COLOR || promoteSide == Constants.BLACK_COLOR)) {
                         // Wait user to choose promotion piece before sending confirmation to model
                         showPromoteDialog(movements);
                     } else {

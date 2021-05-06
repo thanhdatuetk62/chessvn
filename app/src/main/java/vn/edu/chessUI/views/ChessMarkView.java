@@ -2,6 +2,8 @@ package vn.edu.chessUI.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
+
 import androidx.appcompat.widget.AppCompatImageView;
 
 import androidx.annotation.NonNull;

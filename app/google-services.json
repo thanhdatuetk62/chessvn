@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "715369251595",
+    "firebase_url": "https://chessvn-c4e97-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "chessvn-c4e97",
+    "storage_bucket": "chessvn-c4e97.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:715369251595:android:62076f94bca4528ffd580e",
+        "android_client_info": {
+          "package_name": "vn.edu.vnu.uet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "715369251595-c3h173n8obb8v9kut81e16clavgsatqs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBebk6BfumI1DEe25fopb1zWwWYThTR_qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "715369251595-c3h173n8obb8v9kut81e16clavgsatqs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

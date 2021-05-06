@@ -347,10 +347,9 @@ public class GameState {
             }
         }
         // Free captured piece
-        Pair<ChessPiece, Coordination> capturedInfo = movement.getCapturedPiece();
-        if (capturedInfo != null) {
-            Coordination capturedCoo = capturedInfo.second;
-            ChessPiece capturedPiece = capturedInfo.first;
+        ChessPiece capturedPiece = movement.getCapturedPiece();
+        Coordination capturedCoo = movement.getCapturedCoordination();
+        if (capturedPiece != null && capturedCoo != null) {
             mState[capturedCoo.mX][capturedCoo.mY] = capturedPiece;
         }
         // Update castling availability
@@ -436,5 +435,11 @@ public class GameState {
         if (mHistory.empty())
             return null;
         return mHistory.peek().getActive();
+    }
+
+    public final ChessMovement getLastMove() {
+        if (mHistory.isEmpty())
+            return null;
+        return mHistory.peek();
     }
 }

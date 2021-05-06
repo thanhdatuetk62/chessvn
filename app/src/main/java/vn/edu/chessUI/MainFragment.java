@@ -30,9 +30,16 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         View aiButton = view.findViewById(R.id.button_gameplay_ai);
+        View lanButton = view.findViewById(R.id.button_gameplay_lan);
         aiButton.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putInt("mode", Constants.AI_MODE);
+            Navigation.findNavController(view)
+                    .navigate(R.id.action_mainFragment_to_chessGameFragment, bundle);
+        });
+        lanButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putInt("mode", Constants.LAN_MODE);
             Navigation.findNavController(view)
                     .navigate(R.id.action_mainFragment_to_chessGameFragment, bundle);
         });
