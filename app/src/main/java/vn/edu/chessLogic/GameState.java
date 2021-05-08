@@ -42,6 +42,11 @@ public class GameState {
         bThreaten = other.bThreaten;
         wThreaten = other.wThreaten;
         mHistory = new Stack<>(); // Cannot track the history so that can avoid unexpected modification
+        // Add the last movement :)) (dirty trick)
+        if (!other.mHistory.isEmpty()) {
+            final ChessMovement movement = other.mHistory.peek().copy();
+            mHistory.push(movement);
+        }
         for (int i = 0; i < 2; i++) {
             bCastling[i] = other.bCastling[i];
             wCastling[i] = other.wCastling[i];
@@ -449,7 +454,6 @@ public class GameState {
     }
 
     public int isGameOver() {
-//        Log.d("TEST", String.format("Before: black threaten %s, white threaten %s", bThreaten, wThreaten));
         for(int x1=0; x1<Constants.SIZE; x1++) {
             for(int y1=0; y1<Constants.SIZE; y1++) {
                 for(int x2=0; x2<Constants.SIZE; x2++) {
@@ -463,7 +467,6 @@ public class GameState {
                 }
             }
         }
-//        Log.d("TEST", String.format("After: black threaten %s, white threaten %s", bThreaten, wThreaten));
 
         if ((mColor == Constants.WHITE_COLOR && wThreaten)
                 || (mColor == Constants.BLACK_COLOR && bThreaten)) {

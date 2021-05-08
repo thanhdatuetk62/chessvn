@@ -3,152 +3,198 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:gravity="center"
     tools:context=".views.ChessGameFragment">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/agent_status_bar"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
         android:gravity="center_vertical"
-        android:background="@color/white"
-        android:padding="10dp"
         android:minHeight="50dp"
-        android:orientation="horizontal">
+        android:padding="10dp"
+        android:background="@color/white"
+        android:visibility="visible"
+        >
 
         <ImageView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="30dp"
+            android:id="@+id/agent_flag_color"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:src="@drawable/ic_black_flag" />
 
         <TextView
+            android:id="@+id/agent_name"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
             android:text="Opponent"
-            android:textSize="20sp" />
+            android:layout_toEndOf="@+id/agent_flag_color"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <ImageView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
+            android:id="@+id/agent_status_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/agent_status_text"
+            android:layout_margin="10dp"
             android:src="@drawable/ic_black_circle" />
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_weight="8"
-            android:layout_height="wrap_content"
-            android:text="Inactive"
-            android:textSize="20sp" />
+            android:id="@+id/agent_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_alignParentEnd="true"
+            android:text="Active"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/loading_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/cardview_dark_background"
+        android:visibility="gone"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:text="Loading..." />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:indicatorColor="@color/progress"
+            app:trackThickness="5dp"
+            android:indeterminate="true" />
     </LinearLayout>
+
 
     <vn.edu.chessUI.views.ChessLayout
         android:id="@+id/fragment_chessboard"
         android:layout_width="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:layout_height="match_parent" />
+        android:layout_weight="11"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal" />
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/user_status_bar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center_vertical"
+        android:minHeight="50dp"
+        android:padding="10dp"
+        android:background="@color/white"
+        android:visibility="visible"
+        >
+
+        <ImageView
+            android:id="@+id/user_flag_color"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_white_flag" />
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="You"
+            android:layout_toEndOf="@+id/user_flag_color"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <ImageView
+            android:id="@+id/user_status_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/user_status_text"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_black_circle" />
+
+        <TextView
+            android:id="@+id/user_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_alignParentEnd="true"
+            android:text="Active"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/game_controller"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@color/white"
         android:orientation="horizontal">
 
+        <!--        <FrameLayout-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            android:background="@color/white"-->
+        <!--            android:layout_weight="1">-->
+
+        <!--            <ImageButton-->
+        <!--                android:id="@+id/button_reverse"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="match_parent"-->
+        <!--                android:background="?attr/selectableItemBackgroundBorderless"-->
+        <!--                android:src="@drawable/ic_reverse" />-->
+        <!--        </FrameLayout>-->
+
+        <!--        <FrameLayout-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            android:background="@color/white"-->
+        <!--            android:layout_weight="1">-->
+
+        <!--            <ImageButton-->
+        <!--                android:id="@+id/button_redo"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="match_parent"-->
+        <!--                android:background="?attr/selectableItemBackgroundBorderless"-->
+        <!--                android:src="@drawable/ic_redo" />-->
+        <!--        </FrameLayout>-->
+
         <FrameLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:layout_weight="1">
-
-            <ImageButton
-                android:id="@+id/button_reverse"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_reverse" />
-        </FrameLayout>
-
-<!--        <FrameLayout-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:background="@color/white"-->
-<!--            android:layout_weight="1">-->
-
-<!--            <ImageButton-->
-<!--                android:id="@+id/button_redo"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:background="?attr/selectableItemBackgroundBorderless"-->
-<!--                android:src="@drawable/ic_redo" />-->
-<!--        </FrameLayout>-->
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:layout_weight="1">
+            android:layout_marginStart="10dp"
+            android:background="@color/white">
 
             <ImageButton
                 android:id="@+id/button_undo"
-                android:layout_width="match_parent"
+                android:layout_width="32dp"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_undo" />
         </FrameLayout>
 
         <FrameLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:layout_weight="1">
+            android:layout_alignParentEnd="true"
+            android:background="@color/white">
 
             <ImageButton
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:id="@+id/button_more_actions"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_list" />
+                android:src="@drawable/ic_digitalization"/>
         </FrameLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:gravity="center_vertical"
-        android:minHeight="50dp"
-        android:padding="10dp"
-        android:background="@color/white"
-        >
-
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_white_flag" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="You"
-            android:textSize="20sp" />
-
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_black_circle" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="8"
-            android:layout_height="wrap_content"
-            android:text="Active"
-            android:textSize="20sp" />
-
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

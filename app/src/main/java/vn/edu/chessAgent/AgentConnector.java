@@ -27,6 +27,7 @@ public class AgentConnector {
     private final Executor executor; // Mostly works relate to background tasks, so we need to use Threading
     private int mode; // Use to distinguish between AI mode and LAN mode
     private ChessAI aiAgent; // For AI mode
+    private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
 
@@ -54,7 +55,7 @@ public class AgentConnector {
                 public void run() {
                     try {
                         ServerSocket serverSocket = new ServerSocket(Constants.PORT);
-                        Socket socket = serverSocket.accept();
+                        socket = serverSocket.accept();
                         // Create tunnel for send/receive data
                         inputStream = socket.getInputStream();
                         outputStream = socket.getOutputStream();
@@ -71,7 +72,7 @@ public class AgentConnector {
                 public void run() {
                     Log.d("TEST", "This is Client!");
                     try {
-                        Socket socket = new Socket();
+                        socket = new Socket();
                         socket.connect(new InetSocketAddress(serverAddress, Constants.PORT));
                         // Create tunnel for send/receive data
                         inputStream = socket.getInputStream();
@@ -134,24 +135,29 @@ public class AgentConnector {
             ChessMovement movement = null;
             switch (mode) {
                 case Constants.AI_MODE:
-                    movement = aiAgent.move(state);
+                    // Ensure is thread safe
+                    movement = aiAgent.move(state.copy());
                     break;
                 case Constants.LAN_MODE:
                     // Here feed inputStream the data of the last move
                     // and wait to get the move from opponent
-                    final ChessMovement move = state.getLastMove();
+                    ChessMovement move = state.getLastMove();
                     // block until InputStream and OutputStream available
                     while (inputStream == null || outputStream == null) ;
                     Log.d("TEST", "IO Streams are ready!");
+
                     if (move != null) {
-                        // Convert object to byte array
+                        // Convert object to byte array, copy move to ensure thread safe
                         byte[] bytes = toBytes(move);
                         try {
                             // Send data
+                            Log.d("TEST", "User sends data");
                             outputStream.write(bytes);
                         } catch (IOException e) {
                             Log.e("TEST", e.getMessage(), e);
                         }
+                    } else {
+                        Log.d("TEST", "Wtf this move is null pointer?");
                     }
                     // Listen for the move from opponent
                     try {
@@ -159,6 +165,7 @@ public class AgentConnector {
                         // Receive data
                         int rep = inputStream.read(buffer);
                         if (rep > 0) {
+                            Log.d("TEST", "User receives data");
                             // Convert byte back to object
                             movement = fromBytes(buffer);
                         }
@@ -185,5 +192,15 @@ public class AgentConnector {
                 }
             }
         });
+    }
+
+    public void closeConnection() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

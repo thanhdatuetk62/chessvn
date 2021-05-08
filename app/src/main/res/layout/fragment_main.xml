@@ -1,79 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainFragment">
 
-    <LinearLayout
-        android:id="@+id/gameplay_lan"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginTop="50dp"
+        android:text="Choose a Gameplay"
+        android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/button_gameplay_lan"
-            android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:id="@+id/gameplay_lan"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_multiplayer" />
+            android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Local Area Network" />
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/button_gameplay_lan"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_wifi_title" />
 
-    <LinearLayout
-        android:id="@+id/gameplay_ai"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="10dp"
+                android:gravity="center"
+                android:text="Wifi-Direct"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:layout_weight="1">
+        android:layout_height="1dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="#7E7E7E"/>
 
-        <ImageView
-            android:id="@+id/button_gameplay_ai"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_machine" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Artificial Intelligence" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/gameplay_customize"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="20dp">
 
-        <ImageView
-            android:id="@+id/button_gameplay_customize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:id="@+id/gameplay_ai"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_customize" />
-
-        <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Customization" />
-    </LinearLayout>
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/button_gameplay_ai"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_machine" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="10dp"
+                android:gravity="center"
+                android:text="Artificial Intelligence"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="vn.edu.chessUI.MainFragment"
-        android:label="fragment_main"
+        android:label="Home"
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_chessGameFragment"
@@ -21,8 +21,8 @@
     <fragment
         android:id="@+id/chessGameFragment"
         android:name="vn.edu.chessUI.views.ChessGameFragment"
-        android:label="fragment_chess_game"
-        tools:layout="@layout/fragment_chess_game" >
+        android:label="Chess Board"
+        tools:layout="@layout/fragment_chess_game">
         <argument
             android:name="mode"
             app:argType="integer" />

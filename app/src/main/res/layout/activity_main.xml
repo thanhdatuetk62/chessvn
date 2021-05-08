@@ -33,7 +33,6 @@
                 app:menu="@menu/menu"
                 app:navigationIcon="@drawable/ic_list"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:subtitle="Standard"
                 app:title="Offline Chess" />
 
             <androidx.fragment.app.FragmentContainerView
@@ -51,7 +50,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/menu_drawer"
         android:fitsSystemWindows="true" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

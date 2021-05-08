@@ -14,6 +14,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import vn.edu.chessAgent.AgentCallBack;
 import vn.edu.chessAgent.AgentConnector;
@@ -39,6 +40,7 @@ public class ChessViewModel extends AndroidViewModel {
     private char mUserColor = Constants.WHITE_COLOR;
     private char mAgentColor = Constants.BLACK_COLOR;
     private AgentConnector agentConnector;
+    private Executor executor;
 
     @Override
     protected void onCleared() {
@@ -58,7 +60,8 @@ public class ChessViewModel extends AndroidViewModel {
         mLiveDataControl = new MutableLiveData<>(mControl);
 
         // Initialize agent connection
-        agentConnector = new AgentConnector(((ChessApplication) application).executorService);
+        executor = ((ChessApplication) application).executorService;
+        agentConnector = new AgentConnector(executor);
     }
 
     public void loadModelCheckpoint(int mode) {
@@ -66,29 +69,40 @@ public class ChessViewModel extends AndroidViewModel {
         Load model checkpoint from disk / string code
         */
         this.mode = mode;
-        switch (mode) {
-            case Constants.AI_MODE:
+        // Loading panel visible
+        mControl.setLoading(true);
+        // Consider move this method for running on worker thread :)
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // Delay for few seconds
                 try {
-                    // Parse data to model
-                    mModel.loadCheckpoint(Constants.pathToDisk);
-
-                    // Get necessary state (get user perspective, add labels, ...)
-                    //... Not implemented yet
-                    updateUI(false);
-                } catch (Exception e) {
-                    Log.e("EXCEPTION", String.valueOf(e), e);
-
-                    // Create new Game, can choose game level but NOT implemented yet!
-                    // Highlight new game button!
-                    mControl.setOptionHL(true);
-                    updateControl();
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                break;
-            case Constants.LAN_MODE:
-                // User need to choose a player to start the game!
-                mControl.setOptionHL(true);
-                updateControl();
-        }
+                switch (mode) {
+                    case Constants.AI_MODE:
+                        try {
+                            // Parse data to model
+                            mModel.loadCheckpoint(Constants.pathToDisk);
+                        } catch (Exception e) {
+                            Log.e("EXCEPTION", String.valueOf(e), e);
+                            // Create new Game, can choose game level but NOT implemented yet!
+                            // Highlight new game button!
+                            mControl.setOptionHL(true);
+                        }
+                        break;
+                    case Constants.LAN_MODE:
+                        // User need to choose a player to start the game!
+                        mControl.setOptionHL(true);
+                }
+                // Turn off loading
+                mControl.setLoading(false);
+                updateUI(true);
+                updateControl(true);
+            }
+        });
     }
 
     public void newAIGame(int level, int userColor) {
@@ -108,13 +122,14 @@ public class ChessViewModel extends AndroidViewModel {
         mLastCell = null;
         mResponse.setMarks(new ArrayList<>());
 
-        // Call Update UI method
-        updateUI(false);
-
         // Turn off all highlights in control panel
         mControl.setOptionHL(false);
         mControl.setRotateHL(false);
-        updateControl();
+        // Update status
+        handleGameStatus();
+        // Call Update UI method
+        updateUI(false);
+        updateControl(false);
 
         // Connect to AI agent
         agentConnector.connectAI(level, mAgentColor);
@@ -146,13 +161,14 @@ public class ChessViewModel extends AndroidViewModel {
         mLastCell = null;
         mResponse.setMarks(new ArrayList<>());
 
-        // Call Update UI method
-        updateUI(false);
-
         // Turn off all highlights in control panel
         mControl.setOptionHL(false);
         mControl.setRotateHL(false);
-        updateControl();
+        // Update status
+        handleGameStatus();
+        // Call Update UI method
+        updateUI(false);
+        updateControl(false);
 
         if (mUserColor == Constants.BLACK_COLOR)
             agentMove();
@@ -166,8 +182,12 @@ public class ChessViewModel extends AndroidViewModel {
         return mLiveDataControl;
     }
 
-    private void updateControl() {
-        mLiveDataControl.setValue(mControl);
+    private void updateControl(boolean async) {
+        if (async) {
+            mLiveDataControl.postValue(mControl);
+        } else {
+            mLiveDataControl.setValue(mControl);
+        }
     }
 
     private void updateUI(boolean async) {
@@ -266,12 +286,11 @@ public class ChessViewModel extends AndroidViewModel {
 
     public void agentMove() {
         // Called when opponent (agent) perform a move, only used by ChessGameFragment
-        // Send signal to the agent, copy the state to ensure that the thread is safe!
+        // Send signal to the agent, will copy the state (later) to ensure that the thread is safe!
         agentConnector.move(mModel.getState().copy(), new AgentCallBack<ChessMovement>() {
             @Override
             public void onComplete(Result<ChessMovement> result) {
                 if (result instanceof Result.Success) {
-                    // OK what is the message is?
                     ChessMovement movement = ((Result.Success<ChessMovement>) result).data;
                     if (movement != null) {
                         movement.setOnAir();
@@ -288,8 +307,12 @@ public class ChessViewModel extends AndroidViewModel {
                         mCheckMarks = mModel.checkMarks();
                         mResponse.getMarks().addAll(mCheckMarks);
 
+                        // Handle game status
+                        handleGameStatus();
+
                         // Update UI;
                         updateUI(true);
+                        updateControl(true);
                     } else {
                         Log.d("TEST", "Not implemented!");
                     }
@@ -317,7 +340,7 @@ public class ChessViewModel extends AndroidViewModel {
         mControl.rotateHL();
 
         // Update control panel
-        updateControl();
+        updateControl(false);
 
         // Need to update transformer to update board
         // Update UI
@@ -330,7 +353,7 @@ public class ChessViewModel extends AndroidViewModel {
             if (movement == null)
                 // No undo avail
                 return;
-            // No model confirm required because it has already updated on the state!
+            // No model confirm required because it has already updated on the air!
             movement.setOnAir();
             movement.revert();
             ArrayList<Pair<String, Coordination>> locations = mModel.getPieceLocations();
@@ -350,6 +373,26 @@ public class ChessViewModel extends AndroidViewModel {
         return mUserColor;
     }
 
+    private void handleGameStatus() {
+        // get status and init status :)
+        int status = mModel.getGameStatus();
+        mResponse.setGameStatus(status);
+        mControl.setGameStatus(status);
+
+        // Set icon and text for each side
+        mControl.setUserTurn(mModel.getCurrentTurn() == mUserColor
+                ? 1 : 0);
+        mControl.setUserColor(mUserColor == Constants.WHITE_COLOR
+                ? Constants.WHITE_PERSPECTIVE : Constants.BLACK_PERSPECTIVE);
+
+        if (status != Constants.NOT_FINISH) {
+            // Game is over, close all connection
+            // Also close p2p connections which in created in activity!
+            Log.d("TEST", "Close connection? WTF???");
+//            agentConnector.closeConnection();
+        }
+    }
+
     public void confirmMove(ChessMovement movements) {
         // NOTE: Can only be used by user, the agent moves will be handled on another method!
         // Send back to chess model
@@ -363,11 +406,12 @@ public class ChessViewModel extends AndroidViewModel {
         mCheckMarks = mModel.checkMarks();
         mResponse.getMarks().addAll(mCheckMarks);
 
-        int status = mModel.getGameStatus();
-        mResponse.setGameStatus(status);
+        // Will check if game is end or not to display necessary dialogs and close connection!
+        handleGameStatus();
 
         // Update UI
         updateUI(false);
+        updateControl(false);
 
         // Handle the next action of agent move
         agentMove();

@@ -29,8 +29,8 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        View aiButton = view.findViewById(R.id.button_gameplay_ai);
-        View lanButton = view.findViewById(R.id.button_gameplay_lan);
+        View aiButton = view.findViewById(R.id.gameplay_ai);
+        View lanButton = view.findViewById(R.id.gameplay_lan);
         aiButton.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putInt("mode", Constants.AI_MODE);

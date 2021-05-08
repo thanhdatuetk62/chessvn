@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -39,16 +40,27 @@ import vn.edu.Constants;
 
 public class ChessGameFragment extends Fragment {
     private int mode;
+    private int userColor;
+    private int userTurn;
     private ChessViewModel model;
+
     private View mReverseButton;
     private View mUndoButton;
     private View mOptionsButton;
+    private View mUserStatusBar;
+    private View mAgentStatusBar;
+    private View mLoadingBar;
+    private ImageView mUserFlag;
+    private ImageView mAgentFlag;
+
     private AlertDialog mOptionsDialog;
     private FragmentManager fragmentManager;
     private View mOptionsDialogView;
+
     // for AI mode
     private int mAILevel = Constants.NOVICE_LEVEL;
     private int mAISide = Constants.WHITE_PERSPECTIVE;
+
     // for LAN mode
     private ArrayList<String> mPeerNameList;
     private RecyclerView mPeerListRecyclerView;
@@ -82,23 +94,35 @@ public class ChessGameFragment extends Fragment {
 
         // Setup on click event handler for buttons
         // Setup for reverse function
-        mReverseButton = view.findViewById(R.id.button_reverse);
-        mReverseButton.setOnClickListener(v -> onClickRotate());
+//        mReverseButton = view.findViewById(R.id.button_reverse);
+//        mReverseButton.setOnClickListener(v -> onClickRotate());
         // Setup for undo function
         mUndoButton = view.findViewById(R.id.button_undo);
         mUndoButton.setOnClickListener(v -> onClickUndo());
         // Setup for create game function
         mOptionsButton = view.findViewById(R.id.button_more_actions);
         mOptionsButton.setOnClickListener(v -> onClickOptions());
+        // other views setup
+        mUserStatusBar = view.findViewById(R.id.user_status_bar);
+        mAgentStatusBar = view.findViewById(R.id.agent_status_bar);
+        mUserFlag = view.findViewById(R.id.user_flag_color);
+        mAgentFlag = view.findViewById(R.id.agent_flag_color);
+        // loading view
+        mLoadingBar = view.findViewById(R.id.loading_panel);
 
         // Initiate ViewModel which is shared between game play and game board
         model = new ViewModelProvider(this).get(ChessViewModel.class);
+
         // Setup observer for this fragment
         model.getControl().observe(getViewLifecycleOwner(), event -> {
             // This event object is instance of ChessControl class
             handleOptionHL(event.isOptionHL());
             handleRotateHL(event.isRotateHL());
+            handleUserColor(event.getUserColor());
+            handleUserTurn(event.getUserTurn());
+            handleLoading(event.isLoading());
         });
+
         // Initiate chess board fragment
         fragmentManager = getChildFragmentManager();
         Fragment chessBoardFragment = new ChessBoardFragment();
@@ -196,6 +220,7 @@ public class ChessGameFragment extends Fragment {
         mOptionsDialogView = inflater.inflate(R.layout.dialog_lan_options, null);
         mOptionsDialog = new AlertDialog.Builder(requireActivity())
                 .setView(mOptionsDialogView)
+                .setTitle("Choose a peer")
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
@@ -223,6 +248,7 @@ public class ChessGameFragment extends Fragment {
         mOptionsDialogView = inflater.inflate(R.layout.dialog_ai_options, null);
         mOptionsDialog = new AlertDialog.Builder(requireActivity())
                 .setView(mOptionsDialogView)
+                .setTitle("New AI game")
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -249,7 +275,7 @@ public class ChessGameFragment extends Fragment {
             }
         });
         // Fetch data into side spinner
-        Spinner sideSpinner = (Spinner) mOptionsDialogView.findViewById(R.id.spinner_side);
+        Spinner sideSpinner = mOptionsDialogView.findViewById(R.id.spinner_side);
         ArrayAdapter<CharSequence> sideAdapter = ArrayAdapter.createFromResource(requireActivity(),
                 R.array.side, R.layout.support_simple_spinner_dropdown_item);
         sideAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
@@ -271,7 +297,9 @@ public class ChessGameFragment extends Fragment {
         View pv = (View) mOptionsButton.getParent();
         if (o) {
             // Turn on highlight!
-            pv.setBackgroundColor(getResources().getColor(R.color.teal_200));
+            pv.setBackgroundColor(getResources().getColor(R.color.highlight));
+            // Also turn show new Game selection dialog
+            onClickOptions();
         } else {
             // Revert back to transparent
             pv.setBackgroundColor(getResources().getColor(R.color.white));
@@ -279,13 +307,43 @@ public class ChessGameFragment extends Fragment {
     }
 
     private void handleRotateHL(boolean o) {
-        View pv = (View) mReverseButton.getParent();
+//        View pv = (View) mReverseButton.getParent();
+//        if (o) {
+//            // Turn on highlight!
+//            pv.setBackgroundColor(getResources().getColor(R.color.teal_200));
+//        } else {
+//            // Revert back to transparent
+//            pv.setBackgroundColor(getResources().getColor(R.color.white));
+//        }
+    }
+
+    private void handleUserColor(int color) {
+        if (color == -1 || color == userColor)
+            return;
+        mUserFlag.setImageResource(getResources().getIdentifier(
+                (color == Constants.WHITE_PERSPECTIVE ? "ic_white_flag" : "ic_black_flag"),
+                "drawable", requireActivity().getPackageName()));
+        mAgentFlag.setImageResource(getResources().getIdentifier(
+                (color == Constants.BLACK_PERSPECTIVE ? "ic_white_flag" : "ic_black_flag"),
+                "drawable", requireActivity().getPackageName()));
+        userColor = color;
+    }
+
+    private void handleUserTurn(int turn) {
+        if (turn == -1 || turn == userTurn)
+            return;
+        mUserStatusBar.setBackgroundColor(getResources()
+                .getColor((turn == 1 ? R.color.highlight : R.color.white)));
+        mAgentStatusBar.setBackgroundColor(getResources()
+                .getColor((turn == 0 ? R.color.highlight : R.color.white)));
+        userTurn = turn;
+    }
+
+    private void handleLoading(boolean o) {
         if (o) {
-            // Turn on highlight!
-            pv.setBackgroundColor(getResources().getColor(R.color.teal_200));
+            mLoadingBar.setVisibility(View.VISIBLE);
         } else {
-            // Revert back to transparent
-            pv.setBackgroundColor(getResources().getColor(R.color.white));
+            mLoadingBar.setVisibility(View.GONE);
         }
     }
 
@@ -332,7 +390,7 @@ public class ChessGameFragment extends Fragment {
         manager.connect(channel, config, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Toast.makeText(requireActivity(), "Connected to" + mPeerNameList.get(peerID), Toast.LENGTH_LONG).show();
+                Toast.makeText(requireActivity(), "Connecting to" + mPeerNameList.get(peerID), Toast.LENGTH_LONG).show();
             }
 
             @Override

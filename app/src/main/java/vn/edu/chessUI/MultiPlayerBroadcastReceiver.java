@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.util.Log;
@@ -20,6 +21,7 @@ public class MultiPlayerBroadcastReceiver extends BroadcastReceiver {
     private Channel channel;
     private WifiP2pManager.PeerListListener peerListListener;
     private WifiP2pManager.ConnectionInfoListener connectionInfoListener;
+    private WifiP2pInfo curP2pInfo;
 
     public MultiPlayerBroadcastReceiver(WifiP2pManager manager, Channel channel, Activity activity) {
         super();
@@ -48,11 +50,23 @@ public class MultiPlayerBroadcastReceiver extends BroadcastReceiver {
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             // Connection state changed! We should probably do something about
             // that.
-            NetworkInfo networkInfo = (NetworkInfo) intent
+            NetworkInfo newNetworkInfo = intent
                     .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+            WifiP2pInfo newP2pInfo = intent
+                    .getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO);
+
             // Request connection info for setup a new game
-            if (networkInfo.isConnected())
+            if (newNetworkInfo.isConnected()) {
+                Log.d("TEST", String.format("groupFormed: %s", newP2pInfo.groupFormed));
+                Log.d("TEST", String.format("groupOwnerAddress: %s", newP2pInfo.groupOwnerAddress));
+                Log.d("TEST", String.format("isGroupOwner: %s", newP2pInfo.isGroupOwner));
+
+                // Check if new info is the same with the currents
                 manager.requestConnectionInfo(channel, connectionInfoListener);
+
+                // Assign new info
+                curP2pInfo = newP2pInfo;
+            }
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
 
         }

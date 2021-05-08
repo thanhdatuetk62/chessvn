@@ -44,6 +44,10 @@ public class ChessMovement implements Serializable {
         mPromoteSide = other.mPromoteSide;
     }
 
+    public ChessMovement copy() {
+        return new ChessMovement(this);
+    }
+
     public void setActive(int x1, int y1, int x2, int y2) {
         Coordination src = new Coordination(x1, y1);
         Coordination trg = new Coordination(x2, y2);

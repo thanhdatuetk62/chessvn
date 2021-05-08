@@ -97,29 +97,33 @@ public class MainActivity extends AppCompatActivity {
         assert navHostFragment != null;
         NavController navController = navHostFragment.getNavController();
         // drawer
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        AppBarConfiguration appBarConfiguration =
+//                new AppBarConfiguration.Builder(R.id.mainFragment, R.id.chessGameFragment)
+//                        .setOpenableLayout(mDrawer)
+//                        .build();
+//        AppBarConfiguration appBarConfiguration =
+//                new AppBarConfiguration.Builder(R.id.mainFragment, R.id.chessGameFragment).build();
         AppBarConfiguration appBarConfiguration =
-                new AppBarConfiguration.Builder(R.id.mainFragment, R.id.chessGameFragment)
-                        .setOpenableLayout(mDrawer)
-                        .build();
+                new AppBarConfiguration.Builder(navController.getGraph()).build();
         // Link navigation to app bar and drawer
         NavigationView navView = findViewById(R.id.nav_view);
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
         // set drawer's content
-        navView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.nav_home:
-                                navController.navigate(R.id.action_global_mainFragment);
-                                mDrawer.closeDrawers();
-                                break;
-                        }
-                        return true;
-                    }
-                });
+//        navView.setNavigationItemSelectedListener(
+//                new NavigationView.OnNavigationItemSelectedListener() {
+//                    @Override
+//                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//                        switch (item.getItemId()) {
+//                            case R.id.nav_home:
+//                                navController.navigate(R.id.action_global_mainFragment);
+//                                mDrawer.closeDrawers();
+//                                break;
+//                        }
+//                        return true;
+//                    }
+//                });
     }
 
     @Override
