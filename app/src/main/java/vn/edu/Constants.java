@@ -33,4 +33,6 @@ public class Constants {
     public static final int STALEMATE = 0;
     public static final int CHECKMATE = 1;
     public static final int NOT_FINISH = -1;
+    public static final int INF = 100000000;
+    public static final String PATH_TO_CHECKPOINT = "ai_checkpoint.pt";
 }

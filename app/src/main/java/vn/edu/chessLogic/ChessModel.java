@@ -2,6 +2,10 @@ package vn.edu.chessLogic;
 
 import androidx.core.util.Pair;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import vn.edu.chessLogic.pieces.ChessPiece;
@@ -10,16 +14,13 @@ import vn.edu.chessLogic.pieces.PawnPiece;
 import vn.edu.chessLogic.pieces.RookPiece;
 import vn.edu.Constants;
 
-public class ChessModel {
+public class ChessModel implements Serializable {
     private GameState mState;
     protected char curColor;
+    public int level;
 
     public ChessModel() {
         mState = new GameState();
-    }
-
-    public void loadCheckpoint(String checkpoint) {
-        throw new UnsupportedOperationException("Load checkpoint has not been implemented yet!");
     }
 
     public char getCurColor() {
@@ -30,8 +31,9 @@ public class ChessModel {
         return mState.getPieceLocations(color);
     }
 
-    public void newGame(char color) {
+    public void newGame(int level, char color) {
         curColor = color;
+        this.level = level;
         mState.newGame();
     }
 
@@ -88,15 +90,19 @@ public class ChessModel {
 
     public ArrayList<Pair<Integer, Coordination>> getSuggestions(int x, int y) {
         ArrayList<Pair<Integer, Coordination>> suggestions = new ArrayList<>();
-        if (mState.getPieceAt(x, y) == null)
+        if (curColor != mState.getCurrentColor())
             return suggestions;
-        for (int r = 0; r < Constants.SIZE; r++) {
-            for (int c = 0; c < Constants.SIZE; c++) {
-                if (canMove(x, y, r, c)) {
-                    int markType = getMarkType(x, y, r, c);
-                    suggestions.add(new Pair<>(markType, new Coordination(r, c)));
-                }
-            }
+
+        ChessPiece piece = mState.getPieceAt(x, y);
+        if (piece == null)
+            return suggestions;
+
+        if (piece.getColor() != curColor)
+            return suggestions;
+
+        for (Pair<Integer, Integer> p : mState.getAllPossibleMoves(x, y)) {
+            int x2 = p.first, y2 = p.second;
+            suggestions.add(new Pair<>(getMarkType(x, y, x2, y2), new Coordination(x2, y2)));
         }
         return suggestions;
     }

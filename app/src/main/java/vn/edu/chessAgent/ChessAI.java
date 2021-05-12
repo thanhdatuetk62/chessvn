@@ -2,23 +2,18 @@ package vn.edu.chessAgent;
 
 import android.util.Log;
 
+import androidx.core.util.Pair;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Comparator;
 
 import vn.edu.Constants;
 import vn.edu.chessLogic.ChessMovement;
 import vn.edu.chessLogic.Coordination;
 import vn.edu.chessLogic.GameState;
-import vn.edu.chessLogic.PairCells;
-import vn.edu.chessLogic.pieces.BishopPiece;
 import vn.edu.chessLogic.pieces.ChessPiece;
-import vn.edu.chessLogic.pieces.KingPiece;
-import vn.edu.chessLogic.pieces.KnightPiece;
 import vn.edu.chessLogic.pieces.PawnPiece;
-import vn.edu.chessLogic.pieces.QueenPiece;
-import vn.edu.chessLogic.pieces.RookPiece;
 
 public class ChessAI {
     private int level;
@@ -34,22 +29,42 @@ public class ChessAI {
         this.color = color;
     }
 
-    // Random bot
-    public int randInt(int min, int max) {
-        return new Random().nextInt(max - min + 1) + min;
-    }
-
     public ChessMovement move(GameState state) {
         return search(state);
     }
 
-    public static float eval(GameState state, char color) {
+    Comparator<ChessMovement> sortByScore(GameState state) {
+        return (move1, move2) -> {
+            state.move(move1);
+            Integer eval1 = preEval(state);
+            state.undo();
+            state.move(move2);
+            Integer eval2 = preEval(state);
+            state.undo();
+            return eval1.compareTo(eval2);
+        };
+    }
+
+    private int preEval(GameState state) {
+        int deltaTotal = 0;
+
+        // threaten, protection, mobility
+        for (Coordination coo : state.getPieceLocations(color)) {
+            ChessPiece piece = state.getPieceAt(coo);
+            // Delta
+            deltaTotal += piece.d;
+        }
+
+        return deltaTotal;
+    }
+
+    public int eval(GameState state) {
         // Give a evaluate float score value for a specified color side
         // For a win state, its value is 1.0
         // For a draw state, its value is 0
         // for a lose state, its value is -1.0
         int sz = Constants.SIZE;
-        float score = 0.0f;
+        int score = 0;
         // First need to check status, (whether the game is over or not)
         int gameStatus = state.isGameOver();
         if (gameStatus != Constants.NOT_FINISH) {
@@ -57,101 +72,112 @@ public class ChessAI {
                 // Checkmate, if the current state color is the same with the color then the current
                 // color side is lose => Return -1. Otherwise, return +1
                 return (state.getCurrentColor() == color
-                        ? -1.0f : 1.0f);
+                        ? -Constants.INF : Constants.INF);
             } else {
                 // Stalemate (Draw)
-                return 0.0f;
+                return 0;
             }
         }
-
         // Define some features
-        float weightK = 0.80f; // Weight for King
-        float weightQ = 0.50f; // Weight for Queen
-        float weightN = 0.10f; // weight for Knight
-        float weightR = 0.25f; // weight for Rook
-        float weightB = 0.10f; // weight for Bishop
-        float weightP = 0.05f; // weight for Pawn
+        // 1. Delta
+        int deltaTotal = 0;
+        // 2. Mobility of the Pieces
+        int mobility = 0;
+        // 3. Threaten
+        int threaten = 0;
+        // 4. Protection
+        int protection = 0;
+        // 5. Pawn advancement
+        int pawnAdvance = 0;
 
-        // 1. Delta between separate non-king type of pieces for each side
-        float deltaTotal = 0;
-        for (int x=0; x<sz; x++) {
-            for (int y=0; y<sz; y++) {
-                ChessPiece piece = state.getPieceAt(x, y);
-                if (piece == null)
-                    continue;
-                float weight = 0.0f;
-                if (piece instanceof QueenPiece) {
-                    weight = weightQ;
+        // threaten, protection, mobility
+        for (Coordination coo : state.getPieceLocations(color)) {
+            int x1 = coo.getCoordination().first, y1 = coo.getCoordination().second;
+            ChessPiece piece = state.getPieceAt(coo);
+
+            // Delta
+            deltaTotal += piece.d;
+
+            // Pawn advancement
+            if (piece instanceof PawnPiece)
+                pawnAdvance += (color == Constants.WHITE_COLOR ? sz - 1 - x1 : x1);
+
+            // Protections
+            for (Pair<Integer, Integer> p : piece.onHostage(x1, y1, state)) {
+                int x2 = p.first, y2 = p.second;
+                ChessPiece srcPiece = state.getPieceAt(x2, y2);
+                if (!piece.isEnemy(srcPiece)) {
+                    // Under protection by ally
+                    protection += piece.p;
                 }
-                if (piece instanceof KnightPiece) {
-                    weight = weightN;
+            }
+            // Mobility and threaten
+            for (Pair<Integer, Integer> p : piece.allPossibleMoves(x1, y1, state)) {
+                int x2 = p.first, y2 = p.second;
+                ChessPiece trgPiece = state.getPieceAt(x2, y2);
+                if (trgPiece != null && piece.isEnemy(trgPiece)) {
+                    // Threaten enemy
+                    threaten += trgPiece.t;
                 }
-                if (piece instanceof RookPiece) {
-                    weight = weightR;
-                }
-                if (piece instanceof BishopPiece) {
-                    weight = weightB;
-                }
-                if (piece instanceof PawnPiece) {
-                    weight = weightP;
-                }
-                deltaTotal += weight * (piece.getColor() == color ? 1 : -1);
+                mobility += piece.m;
             }
         }
-
-        // 2. Check availability of moves (number of available moves) or to measure who is being more
-        // "conquer" than the other. In details:
-        // => Counting number of squares which are in controlled by current color subtract by
-        //    number of squares which are in controlled by opponent color
-        int[][] cnt = new int[sz][sz];
 
         // Combine features together
-        score = deltaTotal;
+        score = deltaTotal * 4 + mobility + threaten + protection * 4 + pawnAdvance;
         // return score
         return score;
     }
 
     private static class ScoredMove {
-        public float score;
+        public int score;
         public ChessMovement move;
 
-        ScoredMove(float score, ChessMovement move) {
+        ScoredMove(int score, ChessMovement move) {
             this.score = score;
             this.move = move;
         }
     }
 
-    private ScoredMove minimum(GameState state, int d, float alpha, float beta) {
+    private ScoredMove minimum(GameState state, int d, int h, float alpha, float beta) {
         // Initialize
-        ScoredMove minNode = new ScoredMove(Float.POSITIVE_INFINITY, null);
+        ScoredMove minNode = new ScoredMove(Integer.MAX_VALUE, null);
         ArrayList<ChessMovement> possibleMoves = state.getAllPossibleMoves();
 
         // Check if this node is a leaf
         if (possibleMoves.isEmpty() || d == 0) {
-            float score = eval(state, color);
-            return new ScoredMove(score, null);
+            return new ScoredMove(eval(state), null);
         }
 
-        // Shuffle the list to ensure randomness
-        Collections.shuffle(possibleMoves);
+        // Sort increasing eval score
+        Collections.sort(possibleMoves, sortByScore(state));
+
+        // Truncate the number of moves
+        if (h > 0)
+            possibleMoves = new ArrayList<>(possibleMoves.subList(0, Math.min(possibleMoves.size(), h)));
 
         // Iterate through all possible moves
         for (ChessMovement move : possibleMoves) {
             // Stimulate the move
             state.move(move);
+
             // Evaluate the optimal score for the children
-            ScoredMove node = maximum(state, d - 1, alpha, beta);
+            ScoredMove node = maximum(state, d - 1, h, alpha, beta);
+
             // Undo the move
             state.undo();
+
             // Get the minimum values among these max nodes
             if (node.score < minNode.score) {
                 // re-assign the best node
                 minNode.score = node.score;
                 minNode.move = move;
             }
+
             // Early stop due to alpha-beta pruning
             if (minNode.score <= alpha)
                 return minNode;
+
             // Else continue update value
             beta = Math.min(beta, minNode.score);
         }
@@ -159,26 +185,32 @@ public class ChessAI {
         return minNode;
     }
 
-    private ScoredMove maximum(GameState state, int d, float alpha, float beta) {
+    private ScoredMove maximum(GameState state, int d, int h, float alpha, float beta) {
         // Initialize
-        ScoredMove maxNode = new ScoredMove(Float.NEGATIVE_INFINITY, null);
+        ScoredMove maxNode = new ScoredMove(Integer.MIN_VALUE, null);
         ArrayList<ChessMovement> possibleMoves = state.getAllPossibleMoves();
 
         // Check if this node is a leaf
         if (possibleMoves.isEmpty() || d == 0) {
-            float score = eval(state, color);
-            return new ScoredMove(score, null);
+            return new ScoredMove(eval(state), null);
         }
 
-        // Shuffle the list to ensure randomness
-        Collections.shuffle(possibleMoves);
+        // Sort increasing eval score
+        Collections.sort(possibleMoves, sortByScore(state));
+
+        // Reverse to sort decreasing
+        Collections.reverse(possibleMoves);
+
+        // Truncate the number of moves
+        if (h > 0)
+            possibleMoves = new ArrayList<>(possibleMoves.subList(0, Math.min(possibleMoves.size(), h)));
 
         // Not a leaf node, so iterate through all possible moves
         for (ChessMovement move : possibleMoves) {
             // Stimulate the move
             state.move(move);
             // Evaluate the optimal score for the children
-            ScoredMove node = minimum(state, d - 1, alpha, beta);
+            ScoredMove node = minimum(state, d - 1, h, alpha, beta);
             // Undo the move
             state.undo();
             // Get the minimum values among these max nodes
@@ -199,40 +231,23 @@ public class ChessAI {
 
     private ChessMovement search(GameState state) {
         // Extract the depth of search
-        int d = -1;
+        int d = -1, h = -1;
         switch (level) {
             case Constants.NOVICE_LEVEL:
-                d = 1;
-                break;
-            case Constants.EXPERT_LEVEL:
                 d = 2;
                 break;
-            case Constants.MASTER_LEVEL:
+            case Constants.EXPERT_LEVEL:
                 d = 3;
                 break;
+            case Constants.MASTER_LEVEL:
+                d = 4;
+                break;
         }
-
-        Log.d("TEST", String.format("Running with depth %d", d));
-
         // Get the optimal Node for the root (max node)
         // and initialize alpha to -inf and beta to +inf
-        ScoredMove bestNode = maximum(state, d, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+        ScoredMove bestNode = maximum(state, d, h, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
 
-        Log.d("TEST", String.format("Done!. Best score is %f", bestNode.score));
-
-        if (bestNode.move == null) {
-            Log.d("TEST", "... but this move is null?? WTF!!");
-        } else {
-            int x1, y1, x2, y2;
-            PairCells pc = bestNode.move.getActive();
-            Coordination src = pc.src;
-            Coordination trg = pc.trg;
-            x1 = src.getCoordination().first;
-            y1 = src.getCoordination().second;
-            x2 = trg.getCoordination().first;
-            y2 = trg.getCoordination().second;
-            Log.d("TEST", String.format("... with location from (%d, %d) to (%d, %d)", x1, y1, x2, y2));
-        }
+        Log.d("TEST", String.format("Done!. Best score is %d", bestNode.score));
         // Return the optimal movement
         return bestNode.move;
     }

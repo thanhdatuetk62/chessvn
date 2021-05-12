@@ -97,8 +97,6 @@ public class ChessGameFragment extends Fragment {
 //        mReverseButton = view.findViewById(R.id.button_reverse);
 //        mReverseButton.setOnClickListener(v -> onClickRotate());
         // Setup for undo function
-        mUndoButton = view.findViewById(R.id.button_undo);
-        mUndoButton.setOnClickListener(v -> onClickUndo());
         // Setup for create game function
         mOptionsButton = view.findViewById(R.id.button_more_actions);
         mOptionsButton.setOnClickListener(v -> onClickOptions());
@@ -204,10 +202,12 @@ public class ChessGameFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("TEST", "Stopped");
         if (mode == Constants.LAN_MODE) {
             requireActivity().unregisterReceiver(receiver);
 //            disconnect();
+        } else {
+            // AI mode
+            model.saveModelCheckpoint();
         }
     }
 
@@ -228,8 +228,10 @@ public class ChessGameFragment extends Fragment {
                     }
                 })
                 .create();
+
         // Get recycler views
         mPeerListRecyclerView = mOptionsDialogView.findViewById(R.id.peer_list);
+
         // Create peer list adapter
         mPeerListAdapter = new PeerListAdapter(getContext(), mPeerNameList, new OnPeerSelected() {
             @Override
@@ -237,6 +239,7 @@ public class ChessGameFragment extends Fragment {
                 connect(i);
             }
         });
+
         // Setup adapter on recycler view
         mPeerListRecyclerView.setAdapter(mPeerListAdapter);
         mPeerListRecyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
@@ -366,7 +369,7 @@ public class ChessGameFragment extends Fragment {
                     @Override
                     public void onFailure(int reason) {
                         if (reason == WifiP2pManager.BUSY) {
-                            Log.d("TEST","Busy");
+                            Log.d("TEST", "Busy");
                         } else {
                             Log.d("TEST", "Error");
                         }

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.core.util.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -20,7 +21,7 @@ import vn.edu.chessLogic.pieces.RookPiece;
 
 import vn.edu.Constants;
 
-public class GameState {
+public class GameState implements Serializable {
     private char mColor;
     private int bThreatenCnt;
     private int wThreatenCnt;
@@ -31,6 +32,8 @@ public class GameState {
     private final boolean[] wCastling = new boolean[2]; // Can white castling on King/Queen side
     private ChessPiece[][] mState = new ChessPiece[Constants.SIZE][Constants.SIZE];
     private int[] mCornerCnt = new int[4];
+    private Coordination wkLocation;
+    private Coordination bkLocation;
 
     public GameState() {
     }
@@ -41,6 +44,9 @@ public class GameState {
         wThreatenCnt = other.wThreatenCnt;
         bThreaten = other.bThreaten;
         wThreaten = other.wThreaten;
+        wkLocation = new Coordination(other.wkLocation.mX, other.wkLocation.mY);
+        bkLocation = new Coordination(other.bkLocation.mX, other.bkLocation.mY);
+
         mHistory = new Stack<>(); // Cannot track the history so that can avoid unexpected modification
         // Add the last movement :)) (dirty trick)
         if (!other.mHistory.isEmpty()) {
@@ -64,6 +70,8 @@ public class GameState {
         bThreaten = wThreaten = false;
         bCastling[0] = bCastling[1] = true;
         wCastling[0] = wCastling[1] = true;
+        wkLocation = new Coordination(7, 3);
+        bkLocation = new Coordination(0, 3);
         mCornerCnt = new int[4];
         mHistory = new Stack<>();
         mState = new ChessPiece[][]{
@@ -163,7 +171,7 @@ public class GameState {
 
         // Get it's king
         if ((piece.getColor() == Constants.WHITE_COLOR && wThreaten)
-            || (piece.getColor() == Constants.BLACK_COLOR && bThreaten)) {
+                || (piece.getColor() == Constants.BLACK_COLOR && bThreaten)) {
             res = false;
         }
         // Back
@@ -175,7 +183,7 @@ public class GameState {
         char[] promoteOptions = {'Q', 'R', 'N', 'B'};
         char promoteSide = movement.getPromoteSide();
         ArrayList<ChessMovement> replicates = new ArrayList<>();
-        for(int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             ChessMovement newMovement = new ChessMovement(movement);
             newMovement.setPromotion("" + promoteSide + promoteOptions[i]);
             replicates.add(newMovement);
@@ -183,25 +191,89 @@ public class GameState {
         return replicates;
     }
 
+    public String debug() {
+        StringBuilder res = new StringBuilder();
+        res.append("ASCII Board\n");
+        for (int i = 0; i < Constants.SIZE; i++) {
+            for (int j = 0; j < Constants.SIZE; j++) {
+                ChessPiece piece = mState[i][j];
+                if (piece == null) {
+                    res.append("--");
+                } else {
+                    res.append(piece.pieceCode());
+                }
+                res.append(" ");
+            }
+            res.append("\n");
+        }
+        return res.toString();
+    }
+
+    public ArrayList<Pair<Integer, Integer>> getAllPossibleMoves(int x, int y) {
+        ArrayList<Pair<Integer, Integer>> allMoves = new ArrayList<>();
+        ChessPiece srcPiece = getPieceAt(x, y);
+        if (srcPiece == null)
+            return allMoves;
+        for (Pair<Integer, Integer> p : srcPiece.allPossibleMoves(x, y, this)) {
+            ChessMovement movement = createMovement(x, y, p.first, p.second);
+            boolean isKingInDanger = false;
+            move(movement);
+            // Get it's king
+            if ((srcPiece.getColor() == Constants.WHITE_COLOR && wThreaten)
+                    || (srcPiece.getColor() == Constants.BLACK_COLOR && bThreaten)) {
+                isKingInDanger = true;
+            }
+            // Back
+            undo();
+            if (isKingInDanger)
+                // Cannot move because it is dangerous
+                continue;
+            // OK can move now
+            allMoves.add(p);
+        }
+        return allMoves;
+    }
+
     public ArrayList<ChessMovement> getAllPossibleMoves() {
         ArrayList<ChessMovement> allMoves = new ArrayList<>();
-        for(int x1=0; x1<Constants.SIZE; x1++) {
-            for(int y1=0; y1<Constants.SIZE; y1++) {
-                for(int x2=0; x2<Constants.SIZE; x2++) {
-                    for(int y2=0; y2<Constants.SIZE; y2++) {
-                        if (canMove(x1, y1, x2, y2)) {
-                            ChessMovement movement = createMovement(x1, y1, x2, y2);
-                            // Check if there is a promotion,
-                            // if true, we will replicate this movement obj by 4 to stimulate all possible promotion options
-                            char promoteSide = movement.getPromoteSide();
-                            if (promoteSide == Constants.WHITE_COLOR || promoteSide == Constants.BLACK_COLOR) {
-                                // Has promotion
-                                allMoves.addAll(replicatePromotion(movement));
-                            } else
-                                allMoves.add(movement);
-                        }
-                    }
+        ArrayList<Coordination> pieceLocations = getPieceLocations(mColor);
+        String mapBefore = debug();
+        for (Coordination coo : pieceLocations) {
+            int x1 = coo.mX, y1 = coo.mY;
+            ChessPiece piece = getPieceAt(x1, y1);
+            if (piece == null) {
+                Log.d("TEST", String.format("Null pos: %d, %d", x1, y1));
+                Log.d("TEST", "Null map (Before): " + mapBefore);
+                Log.d("TEST", "Null map (After): " + debug());
+            }
+            ArrayList<Pair<Integer, Integer>> moves = piece.allPossibleMoves(x1, y1, this);
+            for (Pair<Integer, Integer> p : moves) {
+                int x2 = p.first, y2 = p.second;
+                ChessMovement movement = createMovement(x1, y1, x2, y2);
+
+                // Prevent checkmate cf
+                //Stimulate the move
+                boolean isKingInDanger = false;
+                move(movement);
+                // Get it's king
+                if ((piece.getColor() == Constants.WHITE_COLOR && wThreaten)
+                        || (piece.getColor() == Constants.BLACK_COLOR && bThreaten)) {
+                    isKingInDanger = true;
                 }
+                // Back
+                undo();
+                if (isKingInDanger)
+                    // Cannot move because it is dangerous
+                    continue;
+
+                // Check if there is a promotion,
+                // if true, we will replicate this movement obj by 4 to stimulate all possible promotion options
+                char promoteSide = movement.getPromoteSide();
+                if (promoteSide == Constants.WHITE_COLOR || promoteSide == Constants.BLACK_COLOR) {
+                    // Has promotion
+                    allMoves.addAll(replicatePromotion(movement));
+                } else
+                    allMoves.add(movement);
             }
         }
         return allMoves;
@@ -212,8 +284,20 @@ public class GameState {
             Coordination src = p.src;
             Coordination trg = p.trg;
             int x1 = src.mX, y1 = src.mY, x2 = trg.mX, y2 = trg.mY;
+
             mState[x2][y2] = mState[x1][y1];
             mState[x1][y1] = null;
+
+            if (mState[x2][y2] instanceof KingPiece) {
+                if (mState[x2][y2].getColor() == Constants.WHITE_COLOR) {
+                    wkLocation = new Coordination(x2, y2);
+                    wThreatenCnt++;
+                } else {
+                    bkLocation = new Coordination(x2, y2);
+                    bThreatenCnt++;
+                }
+            }
+
             for (int i = 0; i < 4; i++) {
                 int x = Constants.ROOK_X[i];
                 int y = Constants.ROOK_Y[i];
@@ -265,10 +349,6 @@ public class GameState {
         ChessPiece trgPiece = getPieceAt(x2, y2);
         if (srcPiece instanceof KingPiece && trgPiece instanceof RookPiece && !srcPiece.isEnemy(trgPiece)) {
             // This is castling case
-            if (x1 != x2) {
-                // Conflict? WTF?
-                throw new RuntimeException(String.format("Conflict Castling Logic in case (%d, %d) -> (%d, %d)", x1, y1, x2, y2));
-            }
             if (y1 - y2 == 3) {
                 // King side Castling
                 // Move king
@@ -310,8 +390,14 @@ public class GameState {
             Log.d("TEST", "Cannot undo because history stack is empty");
             return null;
         }
+//        Log.d("TEST", "Before: " + debug());
+
         ChessMovement movement = mHistory.pop();
 
+        PairCells ac = movement.getActive();
+        Coordination sac = ac.src;
+        Coordination tac = ac.trg;
+//        Log.d("TEST", String.format("Revert move from (%d, %d) -> (%d, %d)", sac.mX, sac.mY, tac.mX, tac.mY));
         // Update cnt
         wThreatenCnt -= (wThreaten ? 1 : 0);
         bThreatenCnt -= (bThreaten ? 1 : 0);
@@ -332,6 +418,15 @@ public class GameState {
             int x1 = src.mX, y1 = src.mY, x2 = trg.mX, y2 = trg.mY;
             mState[x1][y1] = mState[x2][y2];
             mState[x2][y2] = null;
+            if (mState[x1][y1] instanceof KingPiece) {
+                if (mState[x1][y1].getColor() == Constants.WHITE_COLOR) {
+                    wkLocation = new Coordination(x1, y1);
+                    wThreatenCnt--;
+                } else {
+                    bkLocation = new Coordination(x1, y1);
+                    bThreatenCnt--;
+                }
+            }
 
             // Revert corner counters
             for (int i = 0; i < 4; i++) {
@@ -346,19 +441,25 @@ public class GameState {
             }
         }
 
-        // Revert threaten
-        Coordination wkLoc = getKingLocation(Constants.WHITE_COLOR);
-        Coordination bkLoc = getKingLocation(Constants.BLACK_COLOR);
-        KingPiece wkPiece = (KingPiece) getPieceAt(wkLoc);
-        KingPiece bkPiece = (KingPiece) getPieceAt(bkLoc);
-        wThreaten = wkPiece.isThreaten(wkLoc.mX, wkLoc.mY, this);
-        bThreaten = bkPiece.isThreaten(bkLoc.mX, bkLoc.mY, this);
-
         // Free captured piece
         ChessPiece capturedPiece = movement.getCapturedPiece();
         Coordination capturedCoo = movement.getCapturedCoordination();
         if (capturedPiece != null && capturedCoo != null) {
             mState[capturedCoo.mX][capturedCoo.mY] = capturedPiece;
+        }
+
+        // Revert threaten
+        Coordination wkLoc = getKingLocation(Constants.WHITE_COLOR);
+        Coordination bkLoc = getKingLocation(Constants.BLACK_COLOR);
+        KingPiece wkPiece = (KingPiece) getPieceAt(wkLoc);
+        KingPiece bkPiece = (KingPiece) getPieceAt(bkLoc);
+
+        try {
+            wThreaten = wkPiece.isThreaten(wkLoc.mX, wkLoc.mY, this);
+            bThreaten = bkPiece.isThreaten(bkLoc.mX, bkLoc.mY, this);
+        } catch (NullPointerException e) {
+            Log.d("TEST", String.valueOf(e), e);
+            Log.d("TEST", debug());
         }
 
         // Update castling availability
@@ -369,6 +470,8 @@ public class GameState {
 
         // Switch turn WHITE <-> BLACK
         mColor = (mColor == Constants.WHITE_COLOR ? Constants.BLACK_COLOR : Constants.WHITE_COLOR);
+
+//        Log.d("TEST", "After: " + debug());
         return movement;
     }
 
@@ -414,19 +517,10 @@ public class GameState {
     }
 
     protected Coordination getKingLocation(char color) {
-        Coordination coo = null;
-        for (int r = 0; r < Constants.SIZE; r++) {
-            for (int c = 0; c < Constants.SIZE; c++) {
-                ChessPiece piece = mState[r][c];
-                if (piece != null) {
-                    if (piece instanceof KingPiece && piece.getColor() == color) {
-                        coo = new Coordination(r, c);
-                        break;
-                    }
-                }
-            }
-        }
-        return coo;
+        if (color == Constants.WHITE_COLOR)
+            return wkLocation;
+        else
+            return bkLocation;
     }
 
     public boolean canCastling(char color, int side) {
@@ -454,20 +548,10 @@ public class GameState {
     }
 
     public int isGameOver() {
-        for(int x1=0; x1<Constants.SIZE; x1++) {
-            for(int y1=0; y1<Constants.SIZE; y1++) {
-                for(int x2=0; x2<Constants.SIZE; x2++) {
-                    for(int y2=0; y2<Constants.SIZE; y2++) {
-                        ChessPiece piece = getPieceAt(x1, y1);
-                        if (canMove(x1, y1, x2, y2)) {
-                            // Not finished yet
-                            return Constants.NOT_FINISH;
-                        }
-                    }
-                }
-            }
+        if (getAllPossibleMoves().size() > 0) {
+            Log.d("TEST", "WTF?");
+            return Constants.NOT_FINISH;
         }
-
         if ((mColor == Constants.WHITE_COLOR && wThreaten)
                 || (mColor == Constants.BLACK_COLOR && bThreaten)) {
             // Checkmate

@@ -1,10 +1,18 @@
 package vn.edu.chessLogic.pieces;
 
+import androidx.core.util.Pair;
+
+import java.util.ArrayList;
+
 import vn.edu.chessLogic.GameState;
 import vn.edu.Constants;
 
 public class PawnPiece extends ChessPiece {
     public PawnPiece(char color) {
+        d = 1;
+        t = 0;
+        p = 0;
+        m = 0;
         mColor = color;
         mPieceName = Constants.PAWN;
     }
@@ -58,5 +66,53 @@ public class PawnPiece extends ChessPiece {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public ArrayList<Pair<Integer, Integer>> allPossibleMoves(int x, int y, GameState state) {
+        ArrayList<Pair<Integer, Integer>> moves = new ArrayList<>();
+        // Consider white side
+        if (mColor == Constants.WHITE_COLOR) {
+            if (x - 1 >= 0 && x - 1 < Constants.SIZE) {
+                ChessPiece piece = state.getPieceAt(x - 1, y);
+                if (piece == null) {
+                    moves.add(new Pair<>(x - 1, y));
+                    if (x == Constants.SIZE - 2 && state.getPieceAt(x - 2, y) == null)
+                        moves.add(new Pair<>(x - 2, y));
+                }
+                if (y - 1 >= 0 && y - 1 < Constants.SIZE) {
+                    piece = state.getPieceAt(x - 1, y - 1);
+                    if (piece != null && isEnemy(piece))
+                        moves.add(new Pair<>(x - 1, y - 1));
+                }
+                if (y + 1 >= 0 && y + 1 < Constants.SIZE) {
+                    piece = state.getPieceAt(x - 1, y + 1);
+                    if (piece != null && isEnemy(piece))
+                        moves.add(new Pair<>(x - 1, y + 1));
+                }
+            }
+        }
+        // Consider black side
+        if (mColor == Constants.BLACK_COLOR) {
+            if (x + 1 >= 0 && x + 1 < Constants.SIZE) {
+                ChessPiece piece = state.getPieceAt(x + 1, y);
+                if (piece == null) {
+                    moves.add(new Pair<>(x + 1, y));
+                    if (x == 1 && state.getPieceAt(x + 2, y) == null)
+                        moves.add(new Pair<>(x + 2, y));
+                }
+                if (y - 1 >= 0 && y - 1 < Constants.SIZE) {
+                    piece = state.getPieceAt(x + 1, y - 1);
+                    if (piece != null && isEnemy(piece))
+                        moves.add(new Pair<>(x + 1, y - 1));
+                }
+                if (y + 1 >= 0 && y + 1 < Constants.SIZE) {
+                    piece = state.getPieceAt(x + 1, y + 1);
+                    if (piece != null && isEnemy(piece))
+                        moves.add(new Pair<>(x + 1, y + 1));
+                }
+            }
+        }
+        return moves;
     }
 }

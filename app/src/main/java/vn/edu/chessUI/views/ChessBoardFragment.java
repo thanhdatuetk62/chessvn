@@ -6,27 +6,23 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.AlertDialog;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.core.util.Pair;
 
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
-import java.util.zip.Inflater;
 
 import vn.edu.chessLogic.ChessMovement;
 import vn.edu.chessLogic.Coordination;
@@ -43,6 +39,8 @@ public class ChessBoardFragment extends Fragment {
     private ChessViewModel model;
     private AlertDialog mPromoteOptions;
     private ViewGroup mPromoteLayout;
+    private MediaPlayer chessMoveSound;
+    private MediaPlayer chessGameOverSound;
 
     public ChessBoardFragment() {
         // Required empty public constructor
@@ -85,6 +83,9 @@ public class ChessBoardFragment extends Fragment {
         mPromoteOptions.setCanceledOnTouchOutside(false);
         // Link to this view
         mPromoteLayout = (ViewGroup) dialog;
+        // Sound effect
+        chessMoveSound = MediaPlayer.create(requireActivity(), R.raw.chess_move);
+        chessGameOverSound = MediaPlayer.create(requireActivity(), R.raw.game_over);
     }
 
     private void setCellInteraction(boolean enabled) {
@@ -306,6 +307,8 @@ public class ChessBoardFragment extends Fragment {
                             model.confirmMove(movements);
                         showGameOverDialog(response.getGameStatus(), model.getCurrentTurn());
                     }
+                    // Sound effect :))
+                    chessMoveSound.start();
                     // Enable tapping again
                     setCellInteraction(true);
                 }
@@ -325,6 +328,8 @@ public class ChessBoardFragment extends Fragment {
                             model.confirmMove(movements);
                         showGameOverDialog(response.getGameStatus(), model.getCurrentTurn());
                     }
+                    // Sound effect :))
+                    chessMoveSound.start();
                     // Enable tapping again
                     setCellInteraction(true);
                 }
@@ -356,6 +361,7 @@ public class ChessBoardFragment extends Fragment {
             AlertDialog alertDialog = new AlertDialog.Builder(requireActivity())
                     .setView(dialog)
                     .create();
+            chessGameOverSound.start();
             alertDialog.show();
         }
     }

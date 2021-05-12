@@ -13,6 +13,10 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
@@ -28,7 +32,7 @@ import vn.edu.chessUI.ChessApplication;
 import vn.edu.Constants;
 
 public class ChessViewModel extends AndroidViewModel {
-    private final ChessModel mModel;
+    private ChessModel mModel;
     private int mode;
     private ChessResponse mResponse;
     private final ChessControl mControl;
@@ -77,15 +81,50 @@ public class ChessViewModel extends AndroidViewModel {
             public void run() {
                 // Delay for few seconds
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 switch (mode) {
                     case Constants.AI_MODE:
                         try {
-                            // Parse data to model
-                            mModel.loadCheckpoint(Constants.pathToDisk);
+                            // Parse data to model, load from disk
+                            Application app = getApplication();
+                            FileInputStream fis = app.openFileInput(Constants.PATH_TO_CHECKPOINT);
+                            ObjectInputStream is = new ObjectInputStream(fis);
+                            mModel = (ChessModel) is.readObject();
+                            is.close();
+                            fis.close();
+
+                            // Update UI
+                            mResponse = new ChessResponse();
+                            mResponse.setPieceLocations(mModel.getPieceLocations());
+
+                            // Init/clear all marks
+                            mLastActive = mModel.getLastActive();
+                            mCheckMarks = mModel.checkMarks();;
+                            mLastCell = null;
+                            clearMarksExceptHistory();
+
+                            // Preserve check mark
+                            mResponse.getMarks().addAll(mCheckMarks);
+
+                            // Turn off all highlights in control panel
+                            mControl.setOptionHL(false);
+                            mControl.setRotateHL(false);
+                            // Update status
+                            handleGameStatus();
+                            // Call Update UI method
+                            updateUI(true);
+                            updateControl(true);
+
+                            // Connect to AI agent
+                            agentConnector.connectAI(mModel.level, mAgentColor);
+
+                            // Let the agent move first if user is in black side
+                            if (mUserColor != mModel.getCurrentTurn())
+                                agentMove();
+
                         } catch (Exception e) {
                             Log.e("EXCEPTION", String.valueOf(e), e);
                             // Create new Game, can choose game level but NOT implemented yet!
@@ -105,14 +144,40 @@ public class ChessViewModel extends AndroidViewModel {
         });
     }
 
+    public void saveModelCheckpoint() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // Delay for few seconds
+                switch (mode) {
+                    case Constants.AI_MODE:
+                        try {
+                            // Parse data to model
+                            Application app = getApplication();
+                            FileOutputStream fos = app.openFileOutput(Constants.PATH_TO_CHECKPOINT,
+                                    Context.MODE_PRIVATE);
+                            ObjectOutputStream os = new ObjectOutputStream(fos);
+
+                            // Write object to file
+                            os.writeObject(mModel);
+                            os.close();
+                            fos.close();
+                        } catch (Exception e) {
+                            Log.e("EXCEPTION", String.valueOf(e), e);
+                        }
+                        break;
+                }
+            }
+        });
+    }
+
     public void newAIGame(int level, int userColor) {
-        Log.d("TEST", String.format("Create new game with level %d and side %d", level, userColor));
         // Update UI with new game setup
         mUserColor = Constants.COLORS[userColor];
         mAgentColor = Constants.COLORS[userColor ^ 1];
-        mModel.newGame(mUserColor);
+        mModel.newGame(level, mUserColor);
 
-        // Get necessary info to update UI
+        // Update first state in UI
         mResponse = new ChessResponse();
         mResponse.setPieceLocations(mModel.getPieceLocations());
 
@@ -128,14 +193,14 @@ public class ChessViewModel extends AndroidViewModel {
         // Update status
         handleGameStatus();
         // Call Update UI method
-        updateUI(false);
-        updateControl(false);
+        updateUI(true);
+        updateControl(true);
 
         // Connect to AI agent
         agentConnector.connectAI(level, mAgentColor);
 
         // Let the agent move first if user is in black side
-        if (mUserColor == Constants.BLACK_COLOR)
+        if (mUserColor != mModel.getCurrentTurn())
             agentMove();
     }
 
@@ -149,7 +214,7 @@ public class ChessViewModel extends AndroidViewModel {
         // Set white color for client and black color for server :)) because I am lazy OK?
         mUserColor = (isServer ? Constants.BLACK_COLOR : Constants.WHITE_COLOR);
         mAgentColor = (isServer ? Constants.WHITE_COLOR : Constants.BLACK_COLOR);
-        mModel.newGame(mUserColor);
+        mModel.newGame(-1, mUserColor);
 
         // Get necessary info to update UI
         mResponse = new ChessResponse();

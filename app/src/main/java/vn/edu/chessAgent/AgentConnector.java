@@ -136,7 +136,7 @@ public class AgentConnector {
             switch (mode) {
                 case Constants.AI_MODE:
                     // Ensure is thread safe
-                    movement = aiAgent.move(state.copy());
+                    movement = aiAgent.move(state);
                     break;
                 case Constants.LAN_MODE:
                     // Here feed inputStream the data of the last move
