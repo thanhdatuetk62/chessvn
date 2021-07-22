@@ -58,8 +58,8 @@ public class ChessViewModel extends AndroidViewModel {
         mModel = new ChessModel();
 
         // Initialize data UI binding (serve for live data)
-        mResponse = new ChessResponse();
         mControl = new ChessControl();
+        mResponse = new ChessResponse();
         mLiveDataResponse = new MutableLiveData<>(mResponse);
         mLiveDataControl = new MutableLiveData<>(mControl);
 
@@ -76,96 +76,88 @@ public class ChessViewModel extends AndroidViewModel {
         // Loading panel visible
         mControl.setLoading(true);
         // Consider move this method for running on worker thread :)
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                // Delay for few seconds
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                switch (mode) {
-                    case Constants.AI_MODE:
-                        try {
-                            // Parse data to model, load from disk
-                            Application app = getApplication();
-                            FileInputStream fis = app.openFileInput(Constants.PATH_TO_CHECKPOINT);
-                            ObjectInputStream is = new ObjectInputStream(fis);
-                            mModel = (ChessModel) is.readObject();
-                            is.close();
-                            fis.close();
-
-                            // Update UI
-                            mResponse = new ChessResponse();
-                            mResponse.setPieceLocations(mModel.getPieceLocations());
-
-                            // Init/clear all marks
-                            mLastActive = mModel.getLastActive();
-                            mCheckMarks = mModel.checkMarks();;
-                            mLastCell = null;
-                            clearMarksExceptHistory();
-
-                            // Preserve check mark
-                            mResponse.getMarks().addAll(mCheckMarks);
-
-                            // Turn off all highlights in control panel
-                            mControl.setOptionHL(false);
-                            mControl.setRotateHL(false);
-                            // Update status
-                            handleGameStatus();
-                            // Call Update UI method
-                            updateUI(true);
-                            updateControl(true);
-
-                            // Connect to AI agent
-                            agentConnector.connectAI(mModel.level, mAgentColor);
-
-                            // Let the agent move first if user is in black side
-                            if (mUserColor != mModel.getCurrentTurn())
-                                agentMove();
-
-                        } catch (Exception e) {
-                            Log.e("EXCEPTION", String.valueOf(e), e);
-                            // Create new Game, can choose game level but NOT implemented yet!
-                            // Highlight new game button!
-                            mControl.setOptionHL(true);
-                        }
-                        break;
-                    case Constants.LAN_MODE:
-                        // User need to choose a player to start the game!
-                        mControl.setOptionHL(true);
-                }
-                // Turn off loading
-                mControl.setLoading(false);
-                updateUI(true);
-                updateControl(true);
+        executor.execute(() -> {
+            // Delay for few seconds
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            switch (mode) {
+                case Constants.AI_MODE:
+                    try {
+                        // Parse data to model, load from disk
+                        Application app = getApplication();
+                        FileInputStream fis = app.openFileInput(Constants.PATH_TO_CHECKPOINT);
+                        ObjectInputStream is = new ObjectInputStream(fis);
+                        mModel = (ChessModel) is.readObject();
+                        is.close();
+                        fis.close();
+
+                        // Update UI
+                        mResponse = new ChessResponse();
+                        mResponse.setPieceLocations(mModel.getPieceLocations());
+
+                        // Init/clear all marks
+                        mLastActive = mModel.getLastActive();
+                        mCheckMarks = mModel.checkMarks();
+                        mLastCell = null;
+                        clearMarksExceptHistory();
+
+                        // Preserve check mark
+                        mResponse.getMarks().addAll(mCheckMarks);
+
+                        // Turn off all highlights in control panel
+                        mControl.setOptionHL(false);
+                        mControl.setRotateHL(false);
+                        // Update status
+                        handleGameStatus();
+                        // Call Update UI method
+                        updateUI(true);
+                        updateControl(true);
+
+                        // Connect to AI agent
+                        agentConnector.connectAI(mModel.level, mAgentColor);
+
+                        // Let the agent move first if user is in black side
+                        if (mUserColor != mModel.getCurrentTurn())
+                            agentMove();
+
+                    } catch (Exception e) {
+                        Log.e("EXCEPTION", String.valueOf(e), e);
+                        // Create new Game, can choose game level but NOT implemented yet!
+                        // Highlight new game button!
+                        mControl.setOptionHL(true);
+                    }
+                    break;
+                case Constants.LAN_MODE:
+                    // User need to choose a player to start the game!
+                    mControl.setOptionHL(true);
+            }
+            // Turn off loading
+            mControl.setLoading(false);
+            updateUI(true);
+            updateControl(true);
         });
     }
 
     public void saveModelCheckpoint() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                // Delay for few seconds
-                switch (mode) {
-                    case Constants.AI_MODE:
-                        try {
-                            // Parse data to model
-                            Application app = getApplication();
-                            FileOutputStream fos = app.openFileOutput(Constants.PATH_TO_CHECKPOINT,
-                                    Context.MODE_PRIVATE);
-                            ObjectOutputStream os = new ObjectOutputStream(fos);
+        executor.execute(() -> {
+            // Delay for few seconds
+            if (mode == Constants.AI_MODE) {
+                try {
+                    // Parse data to model
+                    Application app = getApplication();
+                    FileOutputStream fos = app.openFileOutput(Constants.PATH_TO_CHECKPOINT,
+                            Context.MODE_PRIVATE);
+                    ObjectOutputStream os = new ObjectOutputStream(fos);
 
-                            // Write object to file
-                            os.writeObject(mModel);
-                            os.close();
-                            fos.close();
-                        } catch (Exception e) {
-                            Log.e("EXCEPTION", String.valueOf(e), e);
-                        }
-                        break;
+                    // Write object to file
+                    os.writeObject(mModel);
+                    os.close();
+                    fos.close();
+                } catch (Exception e) {
+                    Log.e("EXCEPTION", String.valueOf(e), e);
                 }
             }
         });
@@ -352,40 +344,37 @@ public class ChessViewModel extends AndroidViewModel {
     public void agentMove() {
         // Called when opponent (agent) perform a move, only used by ChessGameFragment
         // Send signal to the agent, will copy the state (later) to ensure that the thread is safe!
-        agentConnector.move(mModel.getState().copy(), new AgentCallBack<ChessMovement>() {
-            @Override
-            public void onComplete(Result<ChessMovement> result) {
-                if (result instanceof Result.Success) {
-                    ChessMovement movement = ((Result.Success<ChessMovement>) result).data;
-                    if (movement != null) {
-                        movement.setOnAir();
-                        mModel.postMove(movement);
-                        ArrayList<Pair<String, Coordination>> locations = mModel.getPieceLocations();
-                        mResponse.setMovements(movement);
-                        mResponse.setPieceLocations(locations);
+        agentConnector.move(mModel.getState().copy(), result -> {
+            if (result instanceof Result.Success) {
+                ChessMovement movement = ((Result.Success<ChessMovement>) result).data;
+                if (movement != null) {
+                    movement.setOnAir();
+                    mModel.postMove(movement);
+                    ArrayList<Pair<String, Coordination>> locations = mModel.getPieceLocations();
+                    mResponse.setMovements(movement);
+                    mResponse.setPieceLocations(locations);
 
-                        // Clear marks
-                        mLastActive = mModel.getLastActive();
-                        clearMarksExceptHistory();
+                    // Clear marks
+                    mLastActive = mModel.getLastActive();
+                    clearMarksExceptHistory();
 
-                        // and append these mark to current marks
-                        mCheckMarks = mModel.checkMarks();
-                        mResponse.getMarks().addAll(mCheckMarks);
+                    // and append these mark to current marks
+                    mCheckMarks = mModel.checkMarks();
+                    mResponse.getMarks().addAll(mCheckMarks);
 
-                        // Handle game status
-                        handleGameStatus();
+                    // Handle game status
+                    handleGameStatus();
 
-                        // Update UI;
-                        updateUI(true);
-                        updateControl(true);
-                    } else {
-                        Log.d("TEST", "Not implemented!");
-                    }
+                    // Update UI;
+                    updateUI(true);
+                    updateControl(true);
                 } else {
-                    // Show Error in Logcat
-                    Exception exception = ((Result.Error<ChessMovement>) result).exception;
-                    Log.e("TEST", String.valueOf(exception), exception);
+                    Log.d("TEST", "Not implemented!");
                 }
+            } else {
+                // Show Error in Logcat
+                Exception exception = ((Result.Error<ChessMovement>) result).exception;
+                Log.e("TEST", String.valueOf(exception), exception);
             }
         });
     }

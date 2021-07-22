@@ -64,7 +64,7 @@ public class ChessAI {
         // For a draw state, its value is 0
         // for a lose state, its value is -1.0
         int sz = Constants.SIZE;
-        int score = 0;
+        int score;
         // First need to check status, (whether the game is over or not)
         int gameStatus = state.isGameOver();
         if (gameStatus != Constants.NOT_FINISH) {
@@ -122,7 +122,6 @@ public class ChessAI {
                 mobility += piece.m;
             }
         }
-
         // Combine features together
         score = deltaTotal * 4 + mobility + threaten + protection * 4 + pawnAdvance;
         // return score

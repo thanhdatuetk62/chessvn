@@ -15,7 +15,7 @@ import vn.edu.chessLogic.pieces.RookPiece;
 import vn.edu.Constants;
 
 public class ChessModel implements Serializable {
-    private GameState mState;
+    private final GameState mState;
     protected char curColor;
     public int level;
 
