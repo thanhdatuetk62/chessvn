@@ -10,6 +10,8 @@
 2. Sử dụng Android Studio để import project và tải các extension cần thiết. 
 3. Sau khi import xong, kết nối với thiết bị Android hoặc máy ảo Android và chọn build và cài đặt ứng dụng trên đó.
 
+Hoặc download file APK được build từ bản mới nhất của mã nguồn ở mục releases trên github.
+
 ---
 **Các liên kết**
 1. Link đến tài liệu đặc tả: [click here](https://docs.google.com/document/d/1hY8R8iTuWiruwbsINWXyc22QQtjEoNsJPGeGemEvrQ8/edit?usp=sharing).
